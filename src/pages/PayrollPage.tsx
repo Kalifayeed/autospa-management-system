@@ -1,16 +1,15 @@
-import { mockAttendants } from "@/lib/mock-data";
+import { mockAttendants, COMMISSION_RATE } from "@/lib/mock-data";
 import MetricCard from "@/components/MetricCard";
 import { Wallet, Users } from "lucide-react";
 
 export default function PayrollPage() {
   const totalCommissions = mockAttendants.reduce((sum, a) => sum + a.commission, 0);
-  const dailyWage = 500; // mock base daily wage
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-display font-bold text-foreground">Payroll & Commissions</h1>
-        <p className="text-muted-foreground text-sm">Manage wages, commissions, and payouts</p>
+        <p className="text-muted-foreground text-sm">Commission rate: {COMMISSION_RATE * 100}% of sales · No base wage</p>
       </div>
 
       <div className="grid grid-cols-2 gap-3">
@@ -25,23 +24,29 @@ export default function PayrollPage() {
             <thead>
               <tr className="border-b border-border">
                 <th className="text-left py-2 text-muted-foreground font-medium">Attendant</th>
-                <th className="text-right py-2 text-muted-foreground font-medium">Base Wage</th>
+                <th className="text-right py-2 text-muted-foreground font-medium">Vehicles</th>
                 <th className="text-right py-2 text-muted-foreground font-medium">Sales</th>
-                <th className="text-right py-2 text-muted-foreground font-medium">Commission (15%)</th>
-                <th className="text-right py-2 text-muted-foreground font-medium">Total Payout</th>
+                <th className="text-right py-2 text-muted-foreground font-medium">Commission (30%)</th>
               </tr>
             </thead>
             <tbody>
               {mockAttendants.map((att) => (
                 <tr key={att.id} className="border-b border-border/50">
                   <td className="py-2.5 font-medium text-card-foreground">{att.name}</td>
-                  <td className="py-2.5 text-right text-muted-foreground">KES {dailyWage}</td>
+                  <td className="py-2.5 text-right text-muted-foreground">{att.vehiclesHandled}</td>
                   <td className="py-2.5 text-right text-muted-foreground">KES {att.totalSales.toLocaleString()}</td>
-                  <td className="py-2.5 text-right text-success font-medium">KES {att.commission.toLocaleString()}</td>
-                  <td className="py-2.5 text-right font-bold text-card-foreground">KES {(dailyWage + att.commission).toLocaleString()}</td>
+                  <td className="py-2.5 text-right font-bold text-success">KES {att.commission.toLocaleString()}</td>
                 </tr>
               ))}
             </tbody>
+            <tfoot>
+              <tr className="border-t border-border">
+                <td className="py-2.5 font-semibold text-card-foreground">Total</td>
+                <td className="py-2.5 text-right text-muted-foreground">{mockAttendants.reduce((s, a) => s + a.vehiclesHandled, 0)}</td>
+                <td className="py-2.5 text-right text-muted-foreground">KES {mockAttendants.reduce((s, a) => s + a.totalSales, 0).toLocaleString()}</td>
+                <td className="py-2.5 text-right font-bold text-success">KES {totalCommissions.toLocaleString()}</td>
+              </tr>
+            </tfoot>
           </table>
         </div>
       </div>

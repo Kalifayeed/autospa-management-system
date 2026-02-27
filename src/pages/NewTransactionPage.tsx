@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { mockServices, mockAddOns, mockAttendants } from "@/lib/mock-data";
+import { mockServices, mockAddOns, mockAttendants, type CarpetWash } from "@/lib/mock-data";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Check, ArrowLeft, Car, CreditCard, Smartphone, Building2, Banknote } from "lucide-react";
+import { Check, ArrowLeft, Car, CreditCard, Smartphone, Building2, Banknote, Scissors } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -29,9 +29,22 @@ export default function NewTransactionPage() {
   const [mpesaPhone, setMpesaPhone] = useState("");
   const [notes, setNotes] = useState("");
 
-  const total =
+  // Carpet wash state
+  const [carpetWashEnabled, setCarpetWashEnabled] = useState(false);
+  const [carpetSize, setCarpetSize] = useState<CarpetWash["size"]>("Small");
+  const [carpetColor, setCarpetColor] = useState("");
+  const [carpetAmount, setCarpetAmount] = useState(0);
+  const [carpetOwner, setCarpetOwner] = useState("");
+  const [carpetPhone, setCarpetPhone] = useState("");
+  const [carpetAttendant, setCarpetAttendant] = useState("");
+
+  const serviceTotal =
     mockServices.filter((s) => selectedServices.includes(s.id)).reduce((sum, s) => sum + s.price, 0) +
     mockAddOns.filter((a) => selectedAddOns.includes(a.id)).reduce((sum, a) => sum + a.price, 0);
+
+  const total = serviceTotal + (carpetWashEnabled ? carpetAmount : 0);
+
+  const plateValid = plateNumber.replace(/\s/g, "").length >= 7;
 
   const toggleService = (id: string) => {
     setSelectedServices((prev) => prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]);
@@ -42,7 +55,11 @@ export default function NewTransactionPage() {
   };
 
   const handleSubmit = () => {
-    if (!plateNumber || !vehicleType || selectedServices.length === 0 || !attendantId || !paymentMethod) {
+    if (!plateValid) {
+      toast.error("Plate number must be at least 7 characters");
+      return;
+    }
+    if (!vehicleType || selectedServices.length === 0 || !attendantId || !paymentMethod) {
       toast.error("Please fill in all required fields");
       return;
     }
@@ -69,8 +86,16 @@ export default function NewTransactionPage() {
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label>Plate Number *</Label>
-            <Input value={plateNumber} onChange={(e) => setPlateNumber(e.target.value.toUpperCase())} placeholder="e.g. KCA 123A" className="touch-target font-mono" />
+            <Label>Plate Number * <span className="text-xs text-muted-foreground">(min 7 chars)</span></Label>
+            <Input
+              value={plateNumber}
+              onChange={(e) => setPlateNumber(e.target.value.toUpperCase())}
+              placeholder="e.g. KCA 123A"
+              className={cn("touch-target font-mono", plateNumber && !plateValid && "border-destructive")}
+            />
+            {plateNumber && !plateValid && (
+              <p className="text-xs text-destructive">Enter at least 7 characters</p>
+            )}
           </div>
           <div className="space-y-2">
             <Label>Vehicle Type *</Label>
@@ -101,7 +126,7 @@ export default function NewTransactionPage() {
               >
                 <div>
                   <p className="text-sm font-medium text-card-foreground">{service.name}</p>
-                  <p className="text-xs text-muted-foreground">{service.duration} min</p>
+                  <p className="text-xs text-muted-foreground">{service.category} · {service.duration} min</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-semibold text-card-foreground">KES {service.price}</span>
@@ -135,6 +160,66 @@ export default function NewTransactionPage() {
         </div>
       </section>
 
+      {/* Carpet Wash */}
+      <section className="glass-card rounded-xl p-5 space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="font-display font-semibold text-card-foreground flex items-center gap-2">
+            <Scissors className="h-4 w-4 text-primary" /> Carpet Wash
+          </h2>
+          <button
+            onClick={() => setCarpetWashEnabled(!carpetWashEnabled)}
+            className={cn(
+              "px-3 py-1.5 rounded-lg border text-sm transition-all",
+              carpetWashEnabled ? "border-primary bg-primary/10 text-primary font-medium" : "border-border text-muted-foreground"
+            )}
+          >
+            {carpetWashEnabled ? "Enabled" : "Add Carpet Wash"}
+          </button>
+        </div>
+        {carpetWashEnabled && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+            <div className="space-y-2">
+              <Label>Size</Label>
+              <Select value={carpetSize} onValueChange={(v) => setCarpetSize(v as CarpetWash["size"])}>
+                <SelectTrigger className="touch-target"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Small">Small</SelectItem>
+                  <SelectItem value="Medium">Medium</SelectItem>
+                  <SelectItem value="Large">Large</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Color</Label>
+              <Input value={carpetColor} onChange={(e) => setCarpetColor(e.target.value)} placeholder="e.g. Blue" className="touch-target" />
+            </div>
+            <div className="space-y-2">
+              <Label>Amount (KES)</Label>
+              <Input type="number" value={carpetAmount || ""} onChange={(e) => setCarpetAmount(Number(e.target.value))} placeholder="0" className="touch-target" />
+            </div>
+            <div className="space-y-2">
+              <Label>Owner Name</Label>
+              <Input value={carpetOwner} onChange={(e) => setCarpetOwner(e.target.value)} placeholder="Owner name" className="touch-target" />
+            </div>
+            <div className="space-y-2">
+              <Label>Phone Number</Label>
+              <Input value={carpetPhone} onChange={(e) => setCarpetPhone(e.target.value)} placeholder="0712345678" className="touch-target" />
+            </div>
+            <div className="space-y-2">
+              <Label>Attendant</Label>
+              <Select value={carpetAttendant} onValueChange={setCarpetAttendant}>
+                <SelectTrigger className="touch-target"><SelectValue placeholder="Select" /></SelectTrigger>
+                <SelectContent>
+                  {mockAttendants.filter((a) => a.status === "active").map((a) => (
+                    <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        )}
+      </section>
+
       {/* Attendant */}
       <section className="glass-card rounded-xl p-5 space-y-4">
         <h2 className="font-display font-semibold text-card-foreground">Assign Attendant *</h2>
@@ -142,7 +227,7 @@ export default function NewTransactionPage() {
           <SelectTrigger className="touch-target"><SelectValue placeholder="Select attendant" /></SelectTrigger>
           <SelectContent>
             {mockAttendants.filter((a) => a.status === "active").map((a) => (
-              <SelectItem key={a.id} value={a.id}>{a.name} — {a.shift} shift</SelectItem>
+              <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>
             ))}
           </SelectContent>
         </Select>

@@ -1,5 +1,5 @@
 import { mockServices, mockAddOns } from "@/lib/mock-data";
-import { Clock, Tag } from "lucide-react";
+import { Clock, Tag, Scissors } from "lucide-react";
 
 export default function ServicesPage() {
   const categories = [...new Set(mockServices.map((s) => s.category))];
@@ -47,6 +47,22 @@ export default function ServicesPage() {
           ))}
         </div>
       </div>
+
+      {/* Carpet Wash */}
+      <div>
+        <h2 className="font-display font-semibold text-foreground mb-3 flex items-center gap-2">
+          <Scissors className="h-4 w-4 text-primary" /> Carpet Wash
+        </h2>
+        <div className="glass-card rounded-xl p-4">
+          <p className="text-sm text-muted-foreground mb-2">Custom pricing service — price entered per job.</p>
+          <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+            <span className="px-2 py-1 rounded bg-secondary">Sizes: Small / Medium / Large</span>
+            <span className="px-2 py-1 rounded bg-secondary">Captures: Color, Owner, Phone</span>
+          </div>
+        </div>
+      </div>
+
+      <p className="text-xs text-muted-foreground">* Vehicle plate numbers require a minimum of 7 characters.</p>
     </div>
   );
 }

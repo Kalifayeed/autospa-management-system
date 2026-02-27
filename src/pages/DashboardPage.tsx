@@ -1,6 +1,6 @@
-import { Car, DollarSign, TrendingUp, Clock, Wallet, ArrowDown } from "lucide-react";
+import { Car, DollarSign, TrendingUp, Clock, Wallet, CalendarDays, CalendarRange } from "lucide-react";
 import MetricCard from "@/components/MetricCard";
-import { dashboardStats, mockTransactions, mockAttendants } from "@/lib/mock-data";
+import { dashboardStats, mockTransactions, mockAttendants, COMMISSION_RATE } from "@/lib/mock-data";
 import { useAuth } from "@/lib/auth-context";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 
@@ -25,11 +25,12 @@ export default function DashboardPage() {
       </div>
 
       {/* Key Metrics */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-        <MetricCard title="Vehicles Washed" value={dashboardStats.totalVehiclesToday} icon={Car} variant="primary" trend={{ value: 12, label: "vs yesterday" }} />
-        <MetricCard title="Total Revenue" value={`KES ${dashboardStats.totalRevenue.toLocaleString()}`} icon={DollarSign} variant="success" trend={{ value: 8, label: "vs yesterday" }} />
-        <MetricCard title="Today's Profit" value={`KES ${dashboardStats.todayProfit.toLocaleString()}`} icon={TrendingUp} variant="primary" />
-        <MetricCard title="Pending Payments" value={`KES ${dashboardStats.pendingPayments.toLocaleString()}`} icon={Wallet} variant="warning" />
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4">
+        <MetricCard title="Today's Vehicles" value={dashboardStats.totalVehiclesToday} icon={Car} variant="primary" />
+        <MetricCard title="This Week" value={dashboardStats.totalVehiclesWeek} icon={CalendarDays} variant="primary" />
+        <MetricCard title="This Month" value={dashboardStats.totalVehiclesMonth} icon={CalendarRange} variant="primary" />
+        <MetricCard title="Total Revenue" value={`KES ${dashboardStats.totalRevenue.toLocaleString()}`} icon={DollarSign} variant="success" />
+        <MetricCard title="Commission (30%)" value={`KES ${dashboardStats.totalCommission.toLocaleString()}`} icon={Wallet} variant="warning" />
       </div>
 
       {/* Charts */}
@@ -40,7 +41,7 @@ export default function DashboardPage() {
           <ResponsiveContainer width="100%" height={240}>
             <BarChart data={dashboardStats.revenueByService}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-              <XAxis dataKey="name" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} angle={-30} textAnchor="end" height={60} />
+              <XAxis dataKey="name" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} angle={-35} textAnchor="end" height={70} />
               <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} />
               <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8 }} />
               <Bar dataKey="revenue" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
@@ -74,7 +75,6 @@ export default function DashboardPage() {
 
       {/* Peak Hours + Top Attendants */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Peak Hours */}
         <div className="glass-card rounded-xl p-5">
           <h3 className="font-display font-semibold text-card-foreground mb-4 flex items-center gap-2">
             <Clock className="h-4 w-4 text-primary" /> Peak Hours
@@ -89,7 +89,6 @@ export default function DashboardPage() {
           </ResponsiveContainer>
         </div>
 
-        {/* Top Attendants */}
         <div className="glass-card rounded-xl p-5">
           <h3 className="font-display font-semibold text-card-foreground mb-4">Top Attendants Today</h3>
           <div className="space-y-3">
@@ -105,7 +104,10 @@ export default function DashboardPage() {
                     <p className="text-sm font-medium text-card-foreground truncate">{att.name}</p>
                     <p className="text-xs text-muted-foreground">{att.vehiclesHandled} vehicles</p>
                   </div>
-                  <p className="text-sm font-semibold text-card-foreground">KES {att.totalSales.toLocaleString()}</p>
+                  <div className="text-right">
+                    <p className="text-sm font-semibold text-card-foreground">KES {att.totalSales.toLocaleString()}</p>
+                    <p className="text-xs text-success">Com: KES {att.commission.toLocaleString()}</p>
+                  </div>
                 </div>
               ))}
           </div>
