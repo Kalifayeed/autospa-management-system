@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { mockTransactions } from "@/lib/mock-data";
-import { Search, Filter, Plus } from "lucide-react";
+import { useAppState } from "@/lib/app-state";
+import { Search, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
@@ -8,8 +8,9 @@ import { useNavigate } from "react-router-dom";
 export default function TransactionsPage() {
   const [search, setSearch] = useState("");
   const navigate = useNavigate();
+  const { transactions } = useAppState();
 
-  const filtered = mockTransactions.filter(
+  const filtered = transactions.filter(
     (tx) =>
       tx.plateNumber.toLowerCase().includes(search.toLowerCase()) ||
       tx.attendantName.toLowerCase().includes(search.toLowerCase()) ||
@@ -28,19 +29,17 @@ export default function TransactionsPage() {
         </Button>
       </div>
 
-      {/* Search */}
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Search by plate, attendant, or service..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="pl-10 touch-target"
-        />
+        <Input placeholder="Search by plate, attendant, or service..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10 touch-target" />
       </div>
 
-      {/* Transaction list */}
       <div className="space-y-3">
+        {filtered.length === 0 && (
+          <div className="glass-card rounded-xl p-8 text-center">
+            <p className="text-muted-foreground">No transactions yet. Click "New Transaction" to get started.</p>
+          </div>
+        )}
         {filtered.map((tx) => (
           <div key={tx.id} className="glass-card rounded-xl p-4 animate-fade-in">
             <div className="flex items-start justify-between gap-3">

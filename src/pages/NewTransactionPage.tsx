@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { mockServices, mockAddOns, mockAttendants, type CarpetWash } from "@/lib/mock-data";
+import { mockServices, mockAddOns, type CarpetWash } from "@/lib/mock-data";
+import { useAppState } from "@/lib/app-state";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,6 +21,7 @@ const paymentMethods = [
 
 export default function NewTransactionPage() {
   const navigate = useNavigate();
+  const { addTransaction, attendants } = useAppState();
   const [plateNumber, setPlateNumber] = useState("");
   const [vehicleType, setVehicleType] = useState("");
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
@@ -29,7 +31,6 @@ export default function NewTransactionPage() {
   const [mpesaPhone, setMpesaPhone] = useState("");
   const [notes, setNotes] = useState("");
 
-  // Carpet wash state
   const [carpetWashEnabled, setCarpetWashEnabled] = useState(false);
   const [carpetSize, setCarpetSize] = useState<CarpetWash["size"]>("Small");
   const [carpetColor, setCarpetColor] = useState("");
@@ -37,6 +38,8 @@ export default function NewTransactionPage() {
   const [carpetOwner, setCarpetOwner] = useState("");
   const [carpetPhone, setCarpetPhone] = useState("");
   const [carpetAttendant, setCarpetAttendant] = useState("");
+
+  const activeAttendants = attendants.filter((a) => a.status === "active");
 
   const serviceTotal =
     mockServices.filter((s) => selectedServices.includes(s.id)).reduce((sum, s) => sum + s.price, 0) +
@@ -63,6 +66,28 @@ export default function NewTransactionPage() {
       toast.error("Please fill in all required fields");
       return;
     }
+
+    const attendant = attendants.find((a) => a.id === attendantId);
+    const serviceNames = mockServices.filter((s) => selectedServices.includes(s.id)).map((s) => s.name);
+    const addOnNames = mockAddOns.filter((a) => selectedAddOns.includes(a.id)).map((a) => a.name);
+
+    addTransaction({
+      plateNumber: plateNumber.toUpperCase(),
+      vehicleType,
+      services: serviceNames,
+      addOns: addOnNames,
+      attendantId,
+      attendantName: attendant?.name || "",
+      total,
+      paymentMethod: paymentMethods.find((p) => p.id === paymentMethod)?.label || paymentMethod,
+      paymentStatus: "paid",
+      timestamp: new Date().toISOString(),
+      notes: notes || undefined,
+      carpetWash: carpetWashEnabled
+        ? { size: carpetSize, color: carpetColor, amount: carpetAmount, ownerName: carpetOwner, phone: carpetPhone, attendantId: carpetAttendant }
+        : undefined,
+    });
+
     toast.success("Transaction completed successfully!");
     navigate("/transactions");
   };
@@ -93,9 +118,7 @@ export default function NewTransactionPage() {
               placeholder="e.g. KCA 123A"
               className={cn("touch-target font-mono", plateNumber && !plateValid && "border-destructive")}
             />
-            {plateNumber && !plateValid && (
-              <p className="text-xs text-destructive">Enter at least 7 characters</p>
-            )}
+            {plateNumber && !plateValid && <p className="text-xs text-destructive">Enter at least 7 characters</p>}
           </div>
           <div className="space-y-2">
             <Label>Vehicle Type *</Label>
@@ -116,14 +139,9 @@ export default function NewTransactionPage() {
           {mockServices.map((service) => {
             const selected = selectedServices.includes(service.id);
             return (
-              <button
-                key={service.id}
-                onClick={() => toggleService(service.id)}
-                className={cn(
-                  "flex items-center justify-between p-3 rounded-lg border transition-all touch-target text-left",
-                  selected ? "border-primary bg-primary/5 ring-1 ring-primary" : "border-border hover:border-primary/30"
-                )}
-              >
+              <button key={service.id} onClick={() => toggleService(service.id)}
+                className={cn("flex items-center justify-between p-3 rounded-lg border transition-all touch-target text-left",
+                  selected ? "border-primary bg-primary/5 ring-1 ring-primary" : "border-border hover:border-primary/30")}>
                 <div>
                   <p className="text-sm font-medium text-card-foreground">{service.name}</p>
                   <p className="text-xs text-muted-foreground">{service.category} · {service.duration} min</p>
@@ -145,14 +163,9 @@ export default function NewTransactionPage() {
           {mockAddOns.map((addon) => {
             const selected = selectedAddOns.includes(addon.id);
             return (
-              <button
-                key={addon.id}
-                onClick={() => toggleAddOn(addon.id)}
-                className={cn(
-                  "px-3 py-2 rounded-lg border text-sm transition-all touch-target",
-                  selected ? "border-primary bg-primary/5 text-primary font-medium" : "border-border text-card-foreground hover:border-primary/30"
-                )}
-              >
+              <button key={addon.id} onClick={() => toggleAddOn(addon.id)}
+                className={cn("px-3 py-2 rounded-lg border text-sm transition-all touch-target",
+                  selected ? "border-primary bg-primary/5 text-primary font-medium" : "border-border text-card-foreground hover:border-primary/30")}>
                 {addon.name} +KES {addon.price}
               </button>
             );
@@ -166,13 +179,9 @@ export default function NewTransactionPage() {
           <h2 className="font-display font-semibold text-card-foreground flex items-center gap-2">
             <Scissors className="h-4 w-4 text-primary" /> Carpet Wash
           </h2>
-          <button
-            onClick={() => setCarpetWashEnabled(!carpetWashEnabled)}
-            className={cn(
-              "px-3 py-1.5 rounded-lg border text-sm transition-all",
-              carpetWashEnabled ? "border-primary bg-primary/10 text-primary font-medium" : "border-border text-muted-foreground"
-            )}
-          >
+          <button onClick={() => setCarpetWashEnabled(!carpetWashEnabled)}
+            className={cn("px-3 py-1.5 rounded-lg border text-sm transition-all",
+              carpetWashEnabled ? "border-primary bg-primary/10 text-primary font-medium" : "border-border text-muted-foreground")}>
             {carpetWashEnabled ? "Enabled" : "Add Carpet Wash"}
           </button>
         </div>
@@ -210,9 +219,7 @@ export default function NewTransactionPage() {
               <Select value={carpetAttendant} onValueChange={setCarpetAttendant}>
                 <SelectTrigger className="touch-target"><SelectValue placeholder="Select" /></SelectTrigger>
                 <SelectContent>
-                  {mockAttendants.filter((a) => a.status === "active").map((a) => (
-                    <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>
-                  ))}
+                  {activeAttendants.map((a) => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
@@ -226,9 +233,7 @@ export default function NewTransactionPage() {
         <Select value={attendantId} onValueChange={setAttendantId}>
           <SelectTrigger className="touch-target"><SelectValue placeholder="Select attendant" /></SelectTrigger>
           <SelectContent>
-            {mockAttendants.filter((a) => a.status === "active").map((a) => (
-              <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>
-            ))}
+            {activeAttendants.map((a) => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}
           </SelectContent>
         </Select>
       </section>
@@ -240,14 +245,9 @@ export default function NewTransactionPage() {
           {paymentMethods.map((pm) => {
             const selected = paymentMethod === pm.id;
             return (
-              <button
-                key={pm.id}
-                onClick={() => setPaymentMethod(pm.id)}
-                className={cn(
-                  "flex flex-col items-center gap-1.5 p-3 rounded-lg border transition-all touch-target",
-                  selected ? "border-primary bg-primary/5 ring-1 ring-primary" : "border-border hover:border-primary/30"
-                )}
-              >
+              <button key={pm.id} onClick={() => setPaymentMethod(pm.id)}
+                className={cn("flex flex-col items-center gap-1.5 p-3 rounded-lg border transition-all touch-target",
+                  selected ? "border-primary bg-primary/5 ring-1 ring-primary" : "border-border hover:border-primary/30")}>
                 <pm.icon className={cn("h-5 w-5", selected ? "text-primary" : "text-muted-foreground")} />
                 <span className={cn("text-xs font-medium", selected ? "text-primary" : "text-muted-foreground")}>{pm.label}</span>
               </button>
