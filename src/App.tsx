@@ -26,24 +26,26 @@ const App = () => (
       <Toaster />
       <Sonner />
       <AuthProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
-            <Route element={<AppLayout />}>
-              <Route path="/dashboard" element={<DashboardPage />} />
-              <Route path="/transactions" element={<TransactionsPage />} />
-              <Route path="/transactions/new" element={<NewTransactionPage />} />
-              <Route path="/services" element={<ServicesPage />} />
-              <Route path="/attendants" element={<AttendantsPage />} />
-              <Route path="/expenses" element={<ExpensesPage />} />
-              <Route path="/payroll" element={<PayrollPage />} />
-              <Route path="/reports" element={<ReportsPage />} />
-              <Route path="/customers" element={<CustomersPage />} />
-            </Route>
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
+        <AppStateProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+              <Route element={<AppLayout />}>
+                <Route path="/dashboard" element={<DashboardPage />} />
+                <Route path="/transactions" element={<TransactionsPage />} />
+                <Route path="/transactions/new" element={<NewTransactionPage />} />
+                <Route path="/services" element={<ServicesPage />} />
+                <Route path="/attendants" element={<AttendantsPage />} />
+                <Route path="/expenses" element={<ExpensesPage />} />
+                <Route path="/payroll" element={<PayrollPage />} />
+                <Route path="/reports" element={<ReportsPage />} />
+                <Route path="/customers" element={<CustomersPage />} />
+              </Route>
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </AppStateProvider>
       </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>
