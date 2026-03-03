@@ -62,13 +62,8 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: "Admin access required" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    // Use service role for admin operations
-    const supabaseAdmin = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-    );
 
-    const { action, ...payload } = await req.json();
+
 
     if (action === "create") {
       const { email, password, username, display_name, role } = payload;
