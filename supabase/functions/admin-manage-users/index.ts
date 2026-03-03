@@ -11,6 +11,32 @@ Deno.serve(async (req) => {
   }
 
   try {
+    const body = await req.json();
+    const { action, ...payload } = body;
+
+    // Use service role for admin operations
+    const supabaseAdmin = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+    );
+
+    // Bootstrap: allow creating first admin if no users exist
+    if (action === "bootstrap") {
+      const { data: existingUsers } = await supabaseAdmin.from("profiles").select("id").limit(1);
+      if (existingUsers && existingUsers.length > 0) {
+        return new Response(JSON.stringify({ error: "Bootstrap not allowed - users already exist" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+      const { email, password, username, display_name } = payload;
+      const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
+        email, password, email_confirm: true,
+        user_metadata: { username, display_name, role: "admin" },
+      });
+      if (createError) {
+        return new Response(JSON.stringify({ error: createError.message }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+      return new Response(JSON.stringify({ user: newUser.user }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
