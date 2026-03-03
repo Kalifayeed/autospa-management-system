@@ -28,6 +28,7 @@ const navItems = [
   { label: "Payroll", icon: Wallet, path: "/payroll", roles: ["admin"] },
   { label: "Reports", icon: BarChart3, path: "/reports", roles: ["admin"] },
   { label: "Customers", icon: UserCircle, path: "/customers", roles: ["admin"] },
+  { label: "User Management", icon: Users, path: "/users", roles: ["admin"] },
 ];
 
 export default function AppSidebar() {
