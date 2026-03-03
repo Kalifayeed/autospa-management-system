@@ -1,16 +1,17 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/auth-context";
-import { Droplets, Eye, EyeOff } from "lucide-react";
+import { Droplets, Eye, EyeOff, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export default function LoginPage() {
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   const { login, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
@@ -19,14 +20,17 @@ export default function LoginPage() {
     return null;
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    if (login(username, password)) {
+    setSubmitting(true);
+    const result = await login(email, password);
+    if (result.success) {
       navigate("/dashboard", { replace: true });
     } else {
-      setError("Invalid username or password");
+      setError(result.error || "Invalid credentials");
     }
+    setSubmitting(false);
   };
 
   return (
@@ -44,14 +48,15 @@ export default function LoginPage() {
         {/* Login form */}
         <form onSubmit={handleSubmit} className="glass-card-elevated rounded-2xl p-6 space-y-4 bg-card">
           <div className="space-y-2">
-            <Label htmlFor="username" className="text-card-foreground">Username</Label>
+            <Label htmlFor="email" className="text-card-foreground">Email</Label>
             <Input
-              id="username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="Enter username"
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter email"
               className="touch-target"
-              autoComplete="username"
+              autoComplete="email"
             />
           </div>
           <div className="space-y-2">
@@ -80,19 +85,11 @@ export default function LoginPage() {
             <p className="text-sm text-destructive font-medium">{error}</p>
           )}
 
-          <Button type="submit" className="w-full touch-target gradient-brand text-primary-foreground font-semibold border-0">
+          <Button type="submit" disabled={submitting} className="w-full touch-target gradient-brand text-primary-foreground font-semibold border-0">
+            {submitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
             Sign In
           </Button>
         </form>
-
-        {/* Demo credentials */}
-        <div className="mt-6 p-4 rounded-xl bg-sidebar-accent/50 border border-sidebar-border">
-          <p className="text-xs font-semibold text-sidebar-foreground/70 mb-2">Demo Credentials</p>
-          <div className="space-y-1 text-xs text-sidebar-foreground/50">
-            <p><span className="text-sidebar-foreground/70">Admin:</span> admin / admin123</p>
-            <p><span className="text-sidebar-foreground/70">Attendant:</span> james / pass123</p>
-          </div>
-        </div>
       </div>
     </div>
   );
