@@ -14,6 +14,114 @@ export type Database = {
   }
   public: {
     Tables: {
+      add_ons: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          price: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          price?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          price?: number
+        }
+        Relationships: []
+      }
+      attendants: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          phone: string
+          shift: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          phone?: string
+          shift?: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          phone?: string
+          shift?: string
+          status?: string
+        }
+        Relationships: []
+      }
+      customers: {
+        Row: {
+          created_at: string
+          id: string
+          last_visit: string | null
+          loyalty_points: number
+          name: string
+          phone: string
+          plate_number: string
+          visits: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_visit?: string | null
+          loyalty_points?: number
+          name?: string
+          phone?: string
+          plate_number: string
+          visits?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_visit?: string | null
+          loyalty_points?: number
+          name?: string
+          phone?: string
+          plate_number?: string
+          visits?: number
+        }
+        Relationships: []
+      }
+      expenses: {
+        Row: {
+          amount: number
+          category: string
+          created_at: string
+          date: string
+          description: string
+          id: string
+        }
+        Insert: {
+          amount?: number
+          category: string
+          created_at?: string
+          date?: string
+          description?: string
+          id?: string
+        }
+        Update: {
+          amount?: number
+          category?: string
+          created_at?: string
+          date?: string
+          description?: string
+          id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -38,6 +146,99 @@ export type Database = {
           updated_at?: string
           user_id?: string
           username?: string
+        }
+        Relationships: []
+      }
+      services: {
+        Row: {
+          category: string
+          created_at: string
+          description: string
+          duration: number
+          id: string
+          name: string
+          price: number
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description?: string
+          duration?: number
+          id?: string
+          name: string
+          price?: number
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string
+          duration?: number
+          id?: string
+          name?: string
+          price?: number
+        }
+        Relationships: []
+      }
+      transactions: {
+        Row: {
+          add_ons: string[]
+          attendant_id: string
+          attendant_name: string
+          carpet_amount: number | null
+          carpet_attendant: string | null
+          carpet_color: string | null
+          carpet_owner: string | null
+          carpet_phone: string | null
+          carpet_size: string | null
+          created_at: string
+          id: string
+          notes: string | null
+          payment_method: string
+          payment_status: string
+          plate_number: string
+          services: string[]
+          total: number
+          vehicle_type: string
+        }
+        Insert: {
+          add_ons?: string[]
+          attendant_id?: string
+          attendant_name?: string
+          carpet_amount?: number | null
+          carpet_attendant?: string | null
+          carpet_color?: string | null
+          carpet_owner?: string | null
+          carpet_phone?: string | null
+          carpet_size?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          payment_method?: string
+          payment_status?: string
+          plate_number?: string
+          services?: string[]
+          total?: number
+          vehicle_type?: string
+        }
+        Update: {
+          add_ons?: string[]
+          attendant_id?: string
+          attendant_name?: string
+          carpet_amount?: number | null
+          carpet_attendant?: string | null
+          carpet_color?: string | null
+          carpet_owner?: string | null
+          carpet_phone?: string | null
+          carpet_size?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          payment_method?: string
+          payment_status?: string
+          plate_number?: string
+          services?: string[]
+          total?: number
+          vehicle_type?: string
         }
         Relationships: []
       }
