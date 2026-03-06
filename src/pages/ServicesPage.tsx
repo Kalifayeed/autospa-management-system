@@ -1,8 +1,9 @@
-import { mockServices, mockAddOns } from "@/lib/mock-data";
+import { useAppState } from "@/lib/app-state";
 import { Clock, Tag, Scissors } from "lucide-react";
 
 export default function ServicesPage() {
-  const categories = [...new Set(mockServices.map((s) => s.category))];
+  const { services, addOns } = useAppState();
+  const categories = [...new Set(services.map((s) => s.category))];
 
   return (
     <div className="space-y-6">
@@ -17,29 +18,26 @@ export default function ServicesPage() {
             <Tag className="h-4 w-4 text-primary" /> {cat}
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {mockServices
-              .filter((s) => s.category === cat)
-              .map((service) => (
-                <div key={service.id} className="glass-card rounded-xl p-4 animate-fade-in">
-                  <div className="flex items-start justify-between mb-2">
-                    <h3 className="font-semibold text-card-foreground">{service.name}</h3>
-                    <span className="text-lg font-bold font-display text-primary">KES {service.price}</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground mb-3">{service.description}</p>
-                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                    <Clock className="h-3 w-3" /> {service.duration} min
-                  </div>
+            {services.filter((s) => s.category === cat).map((service) => (
+              <div key={service.id} className="glass-card rounded-xl p-4 animate-fade-in">
+                <div className="flex items-start justify-between mb-2">
+                  <h3 className="font-semibold text-card-foreground">{service.name}</h3>
+                  <span className="text-lg font-bold font-display text-primary">KES {service.price}</span>
                 </div>
-              ))}
+                <p className="text-sm text-muted-foreground mb-3">{service.description}</p>
+                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <Clock className="h-3 w-3" /> {service.duration} min
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       ))}
 
-      {/* Add-Ons */}
       <div>
         <h2 className="font-display font-semibold text-foreground mb-3">Add-Ons</h2>
         <div className="flex flex-wrap gap-2">
-          {mockAddOns.map((addon) => (
+          {addOns.map((addon) => (
             <div key={addon.id} className="glass-card rounded-lg px-4 py-2.5 text-sm">
               <span className="text-card-foreground font-medium">{addon.name}</span>
               <span className="text-primary font-semibold ml-2">+KES {addon.price}</span>
@@ -48,7 +46,6 @@ export default function ServicesPage() {
         </div>
       </div>
 
-      {/* Carpet Wash */}
       <div>
         <h2 className="font-display font-semibold text-foreground mb-3 flex items-center gap-2">
           <Scissors className="h-4 w-4 text-primary" /> Carpet Wash
