@@ -47,25 +47,51 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    let isMounted = true;
+
+    // Safety timeout - never stay loading forever
+    const timeout = setTimeout(() => {
+      if (isMounted && loading) {
+        console.warn("Auth loading timeout - forcing complete");
+        setLoading(false);
+      }
+    }, 5000);
+
+    // Don't await inside onAuthStateChange to avoid deadlocks
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
-        const profile = await fetchUserProfile(session.user);
-        setUser(profile);
+        // Use setTimeout to avoid blocking the callback
+        setTimeout(async () => {
+          if (!isMounted) return;
+          const profile = await fetchUserProfile(session.user);
+          if (isMounted) {
+            setUser(profile);
+            setLoading(false);
+          }
+        }, 0);
       } else {
         setUser(null);
+        setLoading(false);
       }
-      setLoading(false);
     });
 
+    // Initial session check
     supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (!isMounted) return;
       if (session?.user) {
         const profile = await fetchUserProfile(session.user);
-        setUser(profile);
+        if (isMounted) setUser(profile);
       }
-      setLoading(false);
+      if (isMounted) setLoading(false);
+    }).catch(() => {
+      if (isMounted) setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      isMounted = false;
+      clearTimeout(timeout);
+      subscription.unsubscribe();
+    };
   }, []);
 
   const login = useCallback(async (email: string, password: string) => {
