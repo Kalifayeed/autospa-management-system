@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { mockServices, mockAddOns, type CarpetWash } from "@/lib/mock-data";
+import { type CarpetWash } from "@/lib/mock-data";
 import { useAppState } from "@/lib/app-state";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,11 +23,11 @@ type TransactionType = "car_wash" | "carpet_wash" | "both";
 
 export default function NewTransactionPage() {
   const navigate = useNavigate();
-  const { addTransaction, attendants } = useAppState();
+  const { addTransaction, attendants, services, addOns } = useAppState();
 
   const [transactionType, setTransactionType] = useState<TransactionType>("car_wash");
+  const [submitting, setSubmitting] = useState(false);
 
-  // Vehicle fields
   const [plateNumber, setPlateNumber] = useState("");
   const [vehicleType, setVehicleType] = useState("");
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
@@ -37,7 +37,6 @@ export default function NewTransactionPage() {
   const [mpesaPhone, setMpesaPhone] = useState("");
   const [notes, setNotes] = useState("");
 
-  // Carpet wash fields
   const [carpetSize, setCarpetSize] = useState<CarpetWash["size"]>("Small");
   const [carpetColor, setCarpetColor] = useState("");
   const [carpetAmount, setCarpetAmount] = useState(0);
@@ -51,63 +50,35 @@ export default function NewTransactionPage() {
   const includesCarpet = transactionType === "carpet_wash" || transactionType === "both";
 
   const serviceTotal = includesCarWash
-    ? mockServices.filter((s) => selectedServices.includes(s.id)).reduce((sum, s) => sum + s.price, 0) +
-      mockAddOns.filter((a) => selectedAddOns.includes(a.id)).reduce((sum, a) => sum + a.price, 0)
+    ? services.filter((s) => selectedServices.includes(s.id)).reduce((sum, s) => sum + s.price, 0) +
+      addOns.filter((a) => selectedAddOns.includes(a.id)).reduce((sum, a) => sum + a.price, 0)
     : 0;
 
   const total = serviceTotal + (includesCarpet ? carpetAmount : 0);
-
   const plateValid = plateNumber.replace(/\s/g, "").length >= 7;
 
-  const toggleService = (id: string) => {
-    setSelectedServices((prev) => prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]);
-  };
+  const toggleService = (id: string) => setSelectedServices((prev) => prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]);
+  const toggleAddOn = (id: string) => setSelectedAddOns((prev) => prev.includes(id) ? prev.filter((a) => a !== id) : [...prev, id]);
 
-  const toggleAddOn = (id: string) => {
-    setSelectedAddOns((prev) => prev.includes(id) ? prev.filter((a) => a !== id) : [...prev, id]);
-  };
-
-  const handleSubmit = () => {
-    // Validate car wash fields only if car wash is included
+  const handleSubmit = async () => {
     if (includesCarWash) {
-      if (!plateValid) {
-        toast.error("Plate number must be at least 7 characters");
-        return;
-      }
-      if (!vehicleType || selectedServices.length === 0 || !attendantId) {
-        toast.error("Please fill in all vehicle wash fields");
-        return;
-      }
+      if (!plateValid) { toast.error("Plate number must be at least 7 characters"); return; }
+      if (!vehicleType || selectedServices.length === 0 || !attendantId) { toast.error("Please fill in all vehicle wash fields"); return; }
     }
-
-    // Validate carpet wash fields only if carpet wash is included
     if (includesCarpet) {
-      if (!carpetOwner || !carpetPhone || carpetAmount <= 0) {
-        toast.error("Please fill in all carpet wash fields (owner, phone, amount)");
-        return;
-      }
+      if (!carpetOwner || !carpetPhone || carpetAmount <= 0) { toast.error("Please fill in all carpet wash fields (owner, phone, amount)"); return; }
     }
-
-    if (!paymentMethod) {
-      toast.error("Please select a payment method");
-      return;
-    }
-
-    // For carpet-only, we need an attendant from carpet section or general
-    const resolvedAttendantId = includesCarWash ? attendantId : (carpetAttendant || attendantId);
-    if (!resolvedAttendantId && !includesCarWash) {
-      if (!carpetAttendant) {
-        toast.error("Please assign an attendant for the carpet wash");
-        return;
-      }
-    }
+    if (!paymentMethod) { toast.error("Please select a payment method"); return; }
 
     const finalAttendantId = includesCarWash ? attendantId : carpetAttendant;
-    const attendant = attendants.find((a) => a.id === finalAttendantId);
-    const serviceNames = includesCarWash ? mockServices.filter((s) => selectedServices.includes(s.id)).map((s) => s.name) : [];
-    const addOnNames = includesCarWash ? mockAddOns.filter((a) => selectedAddOns.includes(a.id)).map((a) => a.name) : [];
+    if (!finalAttendantId) { toast.error("Please assign an attendant"); return; }
 
-    addTransaction({
+    const attendant = attendants.find((a) => a.id === finalAttendantId);
+    const serviceNames = includesCarWash ? services.filter((s) => selectedServices.includes(s.id)).map((s) => s.name) : [];
+    const addOnNames = includesCarWash ? addOns.filter((a) => selectedAddOns.includes(a.id)).map((a) => a.name) : [];
+
+    setSubmitting(true);
+    await addTransaction({
       plateNumber: includesCarWash ? plateNumber.toUpperCase() : (carpetOwner || "CARPET"),
       vehicleType: includesCarWash ? vehicleType : "Carpet Wash",
       services: includesCarpet && !includesCarWash ? ["Carpet Wash"] : serviceNames,
@@ -123,10 +94,14 @@ export default function NewTransactionPage() {
         ? { size: carpetSize, color: carpetColor, amount: carpetAmount, ownerName: carpetOwner, phone: carpetPhone, attendantId: carpetAttendant }
         : undefined,
     });
+    setSubmitting(false);
 
     toast.success("Transaction completed successfully!");
     navigate("/transactions");
   };
+
+  // Group services by category
+  const categories = [...new Set(services.map((s) => s.category))];
 
   return (
     <div className="space-y-6 max-w-2xl">
@@ -159,7 +134,7 @@ export default function NewTransactionPage() {
         </div>
       </section>
 
-      {/* Vehicle Info - only for car wash */}
+      {/* Vehicle Info */}
       {includesCarWash && (
         <section className="glass-card rounded-xl p-5 space-y-4">
           <h2 className="font-display font-semibold text-card-foreground flex items-center gap-2">
@@ -168,33 +143,27 @@ export default function NewTransactionPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Plate Number * <span className="text-xs text-muted-foreground">(min 7 chars)</span></Label>
-              <Input
-                value={plateNumber}
-                onChange={(e) => setPlateNumber(e.target.value.toUpperCase())}
-                placeholder="e.g. KCA 123A"
-                className={cn("touch-target font-mono", plateNumber && !plateValid && "border-destructive")}
-              />
+              <Input value={plateNumber} onChange={(e) => setPlateNumber(e.target.value.toUpperCase())} placeholder="e.g. KCA 123A"
+                className={cn("touch-target font-mono", plateNumber && !plateValid && "border-destructive")} />
               {plateNumber && !plateValid && <p className="text-xs text-destructive">Enter at least 7 characters</p>}
             </div>
             <div className="space-y-2">
               <Label>Vehicle Type *</Label>
               <Select value={vehicleType} onValueChange={setVehicleType}>
                 <SelectTrigger className="touch-target"><SelectValue placeholder="Select type" /></SelectTrigger>
-                <SelectContent>
-                  {vehicleTypes.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
-                </SelectContent>
+                <SelectContent>{vehicleTypes.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
               </Select>
             </div>
           </div>
         </section>
       )}
 
-      {/* Services - only for car wash */}
+      {/* Services */}
       {includesCarWash && (
         <section className="glass-card rounded-xl p-5 space-y-4">
           <h2 className="font-display font-semibold text-card-foreground">Select Services *</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {mockServices.map((service) => {
+            {services.map((service) => {
               const selected = selectedServices.includes(service.id);
               return (
                 <button key={service.id} onClick={() => toggleService(service.id)}
@@ -215,12 +184,12 @@ export default function NewTransactionPage() {
         </section>
       )}
 
-      {/* Add-ons - only for car wash */}
+      {/* Add-ons */}
       {includesCarWash && (
         <section className="glass-card rounded-xl p-5 space-y-4">
           <h2 className="font-display font-semibold text-card-foreground">Add-Ons</h2>
           <div className="flex flex-wrap gap-2">
-            {mockAddOns.map((addon) => {
+            {addOns.map((addon) => {
               const selected = selectedAddOns.includes(addon.id);
               return (
                 <button key={addon.id} onClick={() => toggleAddOn(addon.id)}
@@ -252,44 +221,28 @@ export default function NewTransactionPage() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2">
-              <Label>Color</Label>
-              <Input value={carpetColor} onChange={(e) => setCarpetColor(e.target.value)} placeholder="e.g. Blue" className="touch-target" />
-            </div>
-            <div className="space-y-2">
-              <Label>Amount (KES) *</Label>
-              <Input type="number" value={carpetAmount || ""} onChange={(e) => setCarpetAmount(Number(e.target.value))} placeholder="0" className="touch-target" />
-            </div>
-            <div className="space-y-2">
-              <Label>Owner Name *</Label>
-              <Input value={carpetOwner} onChange={(e) => setCarpetOwner(e.target.value)} placeholder="Owner name" className="touch-target" />
-            </div>
-            <div className="space-y-2">
-              <Label>Phone Number *</Label>
-              <Input value={carpetPhone} onChange={(e) => setCarpetPhone(e.target.value)} placeholder="0712345678" className="touch-target" />
-            </div>
+            <div className="space-y-2"><Label>Color</Label><Input value={carpetColor} onChange={(e) => setCarpetColor(e.target.value)} placeholder="e.g. Blue" className="touch-target" /></div>
+            <div className="space-y-2"><Label>Amount (KES) *</Label><Input type="number" value={carpetAmount || ""} onChange={(e) => setCarpetAmount(Number(e.target.value))} placeholder="0" className="touch-target" /></div>
+            <div className="space-y-2"><Label>Owner Name *</Label><Input value={carpetOwner} onChange={(e) => setCarpetOwner(e.target.value)} placeholder="Owner name" className="touch-target" /></div>
+            <div className="space-y-2"><Label>Phone Number *</Label><Input value={carpetPhone} onChange={(e) => setCarpetPhone(e.target.value)} placeholder="0712345678" className="touch-target" /></div>
             <div className="space-y-2">
               <Label>Attendant *</Label>
               <Select value={carpetAttendant} onValueChange={setCarpetAttendant}>
                 <SelectTrigger className="touch-target"><SelectValue placeholder="Select" /></SelectTrigger>
-                <SelectContent>
-                  {activeAttendants.map((a) => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}
-                </SelectContent>
+                <SelectContent>{activeAttendants.map((a) => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}</SelectContent>
               </Select>
             </div>
           </div>
         </section>
       )}
 
-      {/* Attendant - only for car wash */}
+      {/* Attendant */}
       {includesCarWash && (
         <section className="glass-card rounded-xl p-5 space-y-4">
           <h2 className="font-display font-semibold text-card-foreground">Assign Attendant *</h2>
           <Select value={attendantId} onValueChange={setAttendantId}>
             <SelectTrigger className="touch-target"><SelectValue placeholder="Select attendant" /></SelectTrigger>
-            <SelectContent>
-              {activeAttendants.map((a) => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}
-            </SelectContent>
+            <SelectContent>{activeAttendants.map((a) => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}</SelectContent>
           </Select>
         </section>
       )}
@@ -311,10 +264,7 @@ export default function NewTransactionPage() {
           })}
         </div>
         {paymentMethod === "mpesa" && (
-          <div className="space-y-2">
-            <Label>M-Pesa Phone Number</Label>
-            <Input value={mpesaPhone} onChange={(e) => setMpesaPhone(e.target.value)} placeholder="e.g. 0712345678" className="touch-target" />
-          </div>
+          <div className="space-y-2"><Label>M-Pesa Phone Number</Label><Input value={mpesaPhone} onChange={(e) => setMpesaPhone(e.target.value)} placeholder="e.g. 0712345678" className="touch-target" /></div>
         )}
       </section>
 
@@ -330,8 +280,8 @@ export default function NewTransactionPage() {
           <p className="text-sm text-muted-foreground">Total</p>
           <p className="text-3xl font-display font-bold text-foreground">KES {total.toLocaleString()}</p>
         </div>
-        <Button onClick={handleSubmit} size="lg" className="gradient-brand text-primary-foreground border-0 touch-target px-8 text-base font-semibold">
-          Process Payment
+        <Button onClick={handleSubmit} disabled={submitting} size="lg" className="gradient-brand text-primary-foreground border-0 touch-target px-8 text-base font-semibold">
+          {submitting ? "Processing..." : "Process Payment"}
         </Button>
       </div>
     </div>
