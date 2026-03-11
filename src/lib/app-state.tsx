@@ -15,6 +15,7 @@ interface AppState {
   addExpense: (exp: Omit<Expense, "id">) => Promise<void>;
   addAttendant: (att: Omit<Attendant, "id">) => Promise<void>;
   updateAttendant: (id: string, data: Partial<Attendant>) => Promise<void>;
+  redeemCustomerWash: (customerId: string) => Promise<void>;
   stats: {
     totalVehiclesToday: number;
     totalVehiclesWeek: number;
@@ -219,6 +220,15 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
     setAttendants((prev) => prev.map((a) => (a.id === id ? { ...a, ...data } : a)));
   }, []);
 
+  const redeemCustomerWash = useCallback(async (customerId: string) => {
+    const { error } = await supabase.from("customers").update({
+      visits: 0,
+      loyalty_points: 0,
+    }).eq("id", customerId);
+    if (error) { console.error("Redeem wash error:", error); throw error; }
+    setCustomers((prev) => prev.map((c) => c.id === customerId ? { ...c, visits: 0, loyaltyPoints: 0 } : c));
+  }, []);
+
   const expensesByPeriod = useCallback(
     (period: "today" | "week" | "month") => {
       const now = getToday();
@@ -303,7 +313,7 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
     <AppStateContext.Provider
       value={{
         transactions, expenses, attendants, customers, services, addOns, loading,
-        addTransaction, addExpense, addAttendant, updateAttendant,
+        addTransaction, addExpense, addAttendant, updateAttendant, redeemCustomerWash,
         stats, expensesByPeriod, totalExpensesByPeriod,
       }}
     >

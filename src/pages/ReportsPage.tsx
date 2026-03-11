@@ -1,18 +1,63 @@
 import { BarChart3, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAppState } from "@/lib/app-state";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { useState, useMemo } from "react";
+
+type Period = "today" | "week" | "month";
+
+function isSameDay(d1: Date, d2: Date) { return d1.toDateString() === d2.toDateString(); }
+function isWithinWeek(d: Date, ref: Date) { const w = new Date(ref); w.setDate(w.getDate() - 7); return d >= w && d <= ref; }
+function isSameMonth(d: Date, ref: Date) { return d.getMonth() === ref.getMonth() && d.getFullYear() === ref.getFullYear(); }
+
+const HOUR_LABELS = ["7AM", "8AM", "9AM", "10AM", "11AM", "12PM", "1PM", "2PM", "3PM", "4PM", "5PM", "6PM"];
+const PAYMENT_LABELS: Record<string, string> = { mpesa: "M-Pesa", cash: "Cash", bank: "Bank Transfer", corporate: "Corporate" };
 
 export default function ReportsPage() {
-  const { stats } = useAppState();
+  const { transactions, services, attendants } = useAppState();
+  const [period, setPeriod] = useState<Period>("today");
 
-  // Derive top service and peak hour from live data
-  const topService = stats.revenueByService.length > 0
-    ? stats.revenueByService.reduce((a, b) => a.revenue > b.revenue ? a : b).name
-    : "N/A";
-  const peakHour = stats.peakHours.length > 0
-    ? stats.peakHours.reduce((a, b) => a.vehicles > b.vehicles ? a : b)
-    : null;
+  const periodLabel = period === "today" ? "Today" : period === "week" ? "This Week" : "This Month";
+
+  const filtered = useMemo(() => {
+    const now = new Date();
+    return transactions.filter((tx) => {
+      const d = new Date(tx.timestamp);
+      if (period === "today") return isSameDay(d, now);
+      if (period === "week") return isWithinWeek(d, now);
+      return isSameMonth(d, now);
+    });
+  }, [transactions, period]);
+
+  const stats = useMemo(() => {
+    const totalRevenue = filtered.reduce((s, tx) => s + tx.total, 0);
+    const totalCommission = Math.round(totalRevenue * 0.3);
+
+    const serviceMap: Record<string, number> = {};
+    filtered.forEach((tx) => {
+      tx.services.forEach((svc) => {
+        const service = services.find((s) => s.name === svc);
+        if (service) serviceMap[svc] = (serviceMap[svc] || 0) + service.price;
+      });
+    });
+    const revenueByService = Object.entries(serviceMap).map(([name, revenue]) => ({ name, revenue }));
+
+    const topService = revenueByService.length > 0
+      ? revenueByService.reduce((a, b) => a.revenue > b.revenue ? a : b).name
+      : "N/A";
+
+    const hourMap: Record<string, number> = {};
+    HOUR_LABELS.forEach((h) => (hourMap[h] = 0));
+    filtered.forEach((tx) => {
+      const h = new Date(tx.timestamp).getHours();
+      const label = h >= 12 ? `${h === 12 ? 12 : h - 12}PM` : `${h}AM`;
+      if (hourMap[label] !== undefined) hourMap[label]++;
+    });
+    const peakHours = HOUR_LABELS.map((hour) => ({ hour, vehicles: hourMap[hour] || 0 }));
+    const peakHour = peakHours.length > 0 ? peakHours.reduce((a, b) => a.vehicles > b.vehicles ? a : b) : null;
+
+    return { totalRevenue, totalCommission, revenueByService, topService, peakHour, vehicleCount: filtered.length };
+  }, [filtered, services]);
 
   return (
     <div className="space-y-6">
@@ -26,9 +71,26 @@ export default function ReportsPage() {
         </Button>
       </div>
 
+      {/* Period Tabs */}
+      <div className="flex gap-2">
+        {(["today", "week", "month"] as Period[]).map((p) => (
+          <button
+            key={p}
+            onClick={() => setPeriod(p)}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              period === p
+                ? "bg-primary text-primary-foreground"
+                : "bg-secondary/50 text-muted-foreground hover:bg-secondary"
+            }`}
+          >
+            {p === "today" ? "Today" : p === "week" ? "This Week" : "This Month"}
+          </button>
+        ))}
+      </div>
+
       {/* Revenue by Service */}
       <div className="glass-card rounded-xl p-5">
-        <h3 className="font-display font-semibold text-card-foreground mb-4">Today's Revenue by Service</h3>
+        <h3 className="font-display font-semibold text-card-foreground mb-4">{periodLabel}'s Revenue by Service</h3>
         {stats.revenueByService.length > 0 ? (
           <ResponsiveContainer width="100%" height={280}>
             <BarChart data={stats.revenueByService}>
@@ -47,13 +109,13 @@ export default function ReportsPage() {
       {/* Smart Insights */}
       <div className="glass-card rounded-xl p-5">
         <h3 className="font-display font-semibold text-card-foreground mb-4 flex items-center gap-2">
-          <BarChart3 className="h-4 w-4 text-primary" /> Today's Insights
+          <BarChart3 className="h-4 w-4 text-primary" /> {periodLabel}'s Insights
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {[
-            { label: "Vehicles Today", value: String(stats.totalVehiclesToday), detail: `${stats.totalVehiclesWeek} this week` },
-            { label: "Peak Hour", value: peakHour && peakHour.vehicles > 0 ? peakHour.hour : "N/A", detail: peakHour && peakHour.vehicles > 0 ? `${peakHour.vehicles} vehicles` : "No data yet" },
-            { label: "Top Service", value: topService, detail: "By revenue" },
+            { label: "Vehicles", value: String(stats.vehicleCount), detail: `${periodLabel}` },
+            { label: "Peak Hour", value: stats.peakHour && stats.peakHour.vehicles > 0 ? stats.peakHour.hour : "N/A", detail: stats.peakHour && stats.peakHour.vehicles > 0 ? `${stats.peakHour.vehicles} vehicles` : "No data yet" },
+            { label: "Top Service", value: stats.topService, detail: "By revenue" },
             { label: "Total Revenue", value: `KES ${stats.totalRevenue.toLocaleString()}`, detail: `Commission: KES ${stats.totalCommission.toLocaleString()}` },
           ].map((insight) => (
             <div key={insight.label} className="p-3 rounded-lg bg-secondary/30">
