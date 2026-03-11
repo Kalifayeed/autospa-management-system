@@ -313,7 +313,7 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
     <AppStateContext.Provider
       value={{
         transactions, expenses, attendants, customers, services, addOns, loading,
-        addTransaction, addExpense, addAttendant, updateAttendant,
+        addTransaction, addExpense, addAttendant, updateAttendant, redeemCustomerWash,
         stats, expensesByPeriod, totalExpensesByPeriod,
       }}
     >
