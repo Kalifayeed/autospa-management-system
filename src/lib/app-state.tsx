@@ -15,6 +15,7 @@ interface AppState {
   addExpense: (exp: Omit<Expense, "id">) => Promise<void>;
   addAttendant: (att: Omit<Attendant, "id">) => Promise<void>;
   updateAttendant: (id: string, data: Partial<Attendant>) => Promise<void>;
+  redeemCustomerWash: (customerId: string) => Promise<void>;
   stats: {
     totalVehiclesToday: number;
     totalVehiclesWeek: number;
