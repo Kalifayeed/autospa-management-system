@@ -220,6 +220,15 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
     setAttendants((prev) => prev.map((a) => (a.id === id ? { ...a, ...data } : a)));
   }, []);
 
+  const redeemCustomerWash = useCallback(async (customerId: string) => {
+    const { error } = await supabase.from("customers").update({
+      visits: 0,
+      loyalty_points: 0,
+    }).eq("id", customerId);
+    if (error) { console.error("Redeem wash error:", error); throw error; }
+    setCustomers((prev) => prev.map((c) => c.id === customerId ? { ...c, visits: 0, loyaltyPoints: 0 } : c));
+  }, []);
+
   const expensesByPeriod = useCallback(
     (period: "today" | "week" | "month") => {
       const now = getToday();
