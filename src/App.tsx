@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -5,21 +6,32 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/lib/auth-context";
 import { AppStateProvider } from "@/lib/app-state";
-import AppLayout from "@/components/AppLayout";
-import LoginPage from "@/pages/LoginPage";
-import DashboardPage from "@/pages/DashboardPage";
-import TransactionsPage from "@/pages/TransactionsPage";
-import NewTransactionPage from "@/pages/NewTransactionPage";
-import ServicesPage from "@/pages/ServicesPage";
-import AttendantsPage from "@/pages/AttendantsPage";
-import ExpensesPage from "@/pages/ExpensesPage";
-import PayrollPage from "@/pages/PayrollPage";
-import ReportsPage from "@/pages/ReportsPage";
-import CustomersPage from "@/pages/CustomersPage";
-import UserManagementPage from "@/pages/UserManagementPage";
-import NotFound from "@/pages/NotFound";
+import { Loader2 } from "lucide-react";
+
+// Lazy load all pages
+const AppLayout = lazy(() => import("@/components/AppLayout"));
+const LoginPage = lazy(() => import("@/pages/LoginPage"));
+const DashboardPage = lazy(() => import("@/pages/DashboardPage"));
+const TransactionsPage = lazy(() => import("@/pages/TransactionsPage"));
+const NewTransactionPage = lazy(() => import("@/pages/NewTransactionPage"));
+const ServicesPage = lazy(() => import("@/pages/ServicesPage"));
+const AttendantsPage = lazy(() => import("@/pages/AttendantsPage"));
+const ExpensesPage = lazy(() => import("@/pages/ExpensesPage"));
+const PayrollPage = lazy(() => import("@/pages/PayrollPage"));
+const ReportsPage = lazy(() => import("@/pages/ReportsPage"));
+const CustomersPage = lazy(() => import("@/pages/CustomersPage"));
+const UserManagementPage = lazy(() => import("@/pages/UserManagementPage"));
+const NotFound = lazy(() => import("@/pages/NotFound"));
 
 const queryClient = new QueryClient();
+
+function PageLoader() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-background">
+      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+    </div>
+  );
+}
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -29,23 +41,25 @@ const App = () => (
       <AuthProvider>
         <AppStateProvider>
           <BrowserRouter>
-            <Routes>
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/" element={<Navigate to="/dashboard" replace />} />
-              <Route element={<AppLayout />}>
-                <Route path="/dashboard" element={<DashboardPage />} />
-                <Route path="/transactions" element={<TransactionsPage />} />
-                <Route path="/transactions/new" element={<NewTransactionPage />} />
-                <Route path="/services" element={<ServicesPage />} />
-                <Route path="/attendants" element={<AttendantsPage />} />
-                <Route path="/expenses" element={<ExpensesPage />} />
-                <Route path="/payroll" element={<PayrollPage />} />
-                <Route path="/reports" element={<ReportsPage />} />
-                <Route path="/customers" element={<CustomersPage />} />
-                <Route path="/users" element={<UserManagementPage />} />
-              </Route>
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+            <Suspense fallback={<PageLoader />}>
+              <Routes>
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                <Route element={<AppLayout />}>
+                  <Route path="/dashboard" element={<DashboardPage />} />
+                  <Route path="/transactions" element={<TransactionsPage />} />
+                  <Route path="/transactions/new" element={<NewTransactionPage />} />
+                  <Route path="/services" element={<ServicesPage />} />
+                  <Route path="/attendants" element={<AttendantsPage />} />
+                  <Route path="/expenses" element={<ExpensesPage />} />
+                  <Route path="/payroll" element={<PayrollPage />} />
+                  <Route path="/reports" element={<ReportsPage />} />
+                  <Route path="/customers" element={<CustomersPage />} />
+                  <Route path="/users" element={<UserManagementPage />} />
+                </Route>
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Suspense>
           </BrowserRouter>
         </AppStateProvider>
       </AuthProvider>
