@@ -48,6 +48,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     let isMounted = true;
+    let profileFetched = false;
 
     // Safety timeout - never stay loading forever
     const timeout = setTimeout(() => {
@@ -55,36 +56,44 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.warn("Auth loading timeout - forcing complete");
         setLoading(false);
       }
-    }, 5000);
+    }, 3000);
 
-    // Don't await inside onAuthStateChange to avoid deadlocks
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const fetchOnce = async (supabaseUser: SupabaseUser) => {
+      if (profileFetched || !isMounted) return;
+      profileFetched = true;
+      const profile = await fetchUserProfile(supabaseUser);
+      if (isMounted) {
+        setUser(profile);
+        setLoading(false);
+      }
+    };
+
+    // Initial session check first
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!isMounted) return;
       if (session?.user) {
-        // Use setTimeout to avoid blocking the callback
-        setTimeout(async () => {
-          if (!isMounted) return;
-          const profile = await fetchUserProfile(session.user);
-          if (isMounted) {
-            setUser(profile);
-            setLoading(false);
-          }
-        }, 0);
+        fetchOnce(session.user);
       } else {
+        setLoading(false);
+      }
+    }).catch(() => {
+      if (isMounted) setLoading(false);
+    });
+
+    // Listen for future changes (sign in/out)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!isMounted) return;
+      if (session?.user) {
+        // Reset flag for new auth events (login/token refresh with user change)
+        if (_event === 'SIGNED_IN') {
+          profileFetched = false;
+        }
+        setTimeout(() => fetchOnce(session.user), 0);
+      } else {
+        profileFetched = false;
         setUser(null);
         setLoading(false);
       }
-    });
-
-    // Initial session check
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      if (!isMounted) return;
-      if (session?.user) {
-        const profile = await fetchUserProfile(session.user);
-        if (isMounted) setUser(profile);
-      }
-      if (isMounted) setLoading(false);
-    }).catch(() => {
-      if (isMounted) setLoading(false);
     });
 
     return () => {
