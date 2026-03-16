@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useAppState } from "@/lib/app-state";
 import { COMMISSION_RATE, type Attendant } from "@/lib/mock-data";
 import { Trophy, Plus, Pencil } from "lucide-react";
@@ -8,20 +8,50 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 
+function isSameDay(d1: Date, d2: Date) { return d1.toDateString() === d2.toDateString(); }
+function isWithinWeek(d: Date, ref: Date) { const w = new Date(ref); w.setDate(w.getDate() - 7); return d >= w && d <= ref; }
+function isSameMonth(d: Date, ref: Date) { return d.getMonth() === ref.getMonth() && d.getFullYear() === ref.getFullYear(); }
+
 export default function AttendantsPage() {
-  const { attendants, addAttendant, updateAttendant, stats } = useAppState();
+  const { attendants, transactions, addAttendant, updateAttendant } = useAppState();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formName, setFormName] = useState("");
   const [formPhone, setFormPhone] = useState("");
   const [formShift, setFormShift] = useState<Attendant["shift"]>("morning");
+  const [period, setPeriod] = useState<"today" | "week" | "month">("today");
 
-  const attStats = stats.attendantStats;
+  const periodStats = useMemo(() => {
+    const now = new Date();
+    const filtered = transactions.filter((tx) => {
+      const d = new Date(tx.timestamp);
+      if (period === "today") return isSameDay(d, now);
+      if (period === "week") return isWithinWeek(d, now);
+      return isSameMonth(d, now);
+    });
+
+    const attMap: Record<string, { vehicles: number; sales: number }> = {};
+    filtered.forEach((tx) => {
+      if (!attMap[tx.attendantId]) attMap[tx.attendantId] = { vehicles: 0, sales: 0 };
+      attMap[tx.attendantId].vehicles++;
+      attMap[tx.attendantId].sales += tx.total;
+    });
+
+    return attendants.map((a) => ({
+      id: a.id,
+      name: a.name,
+      vehiclesHandled: attMap[a.id]?.vehicles || 0,
+      totalSales: attMap[a.id]?.sales || 0,
+      commission: Math.round((attMap[a.id]?.sales || 0) * COMMISSION_RATE),
+    }));
+  }, [transactions, attendants, period]);
+
   const sorted = [...attendants].sort((a, b) => {
-    const sa = attStats.find((s) => s.id === a.id);
-    const sb = attStats.find((s) => s.id === b.id);
+    const sa = periodStats.find((s) => s.id === a.id);
+    const sb = periodStats.find((s) => s.id === b.id);
     return (sb?.totalSales || 0) - (sa?.totalSales || 0);
   });
 
@@ -39,6 +69,8 @@ export default function AttendantsPage() {
     }
     setDialogOpen(false);
   };
+
+  const periodLabel = period === "today" ? "Daily" : period === "week" ? "Weekly" : "Monthly";
 
   return (
     <div className="space-y-6">
@@ -74,12 +106,21 @@ export default function AttendantsPage() {
       </div>
 
       <div className="glass-card rounded-xl p-5">
-        <h2 className="font-display font-semibold text-card-foreground mb-4 flex items-center gap-2">
-          <Trophy className="h-4 w-4 text-warning" /> Daily Rankings
-        </h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="font-display font-semibold text-card-foreground flex items-center gap-2">
+            <Trophy className="h-4 w-4 text-warning" /> {periodLabel} Rankings
+          </h2>
+          <Tabs value={period} onValueChange={(v) => setPeriod(v as typeof period)}>
+            <TabsList className="h-8">
+              <TabsTrigger value="today" className="text-xs px-3 py-1">Today</TabsTrigger>
+              <TabsTrigger value="week" className="text-xs px-3 py-1">This Week</TabsTrigger>
+              <TabsTrigger value="month" className="text-xs px-3 py-1">This Month</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
         <div className="space-y-3">
           {sorted.map((att, i) => {
-            const s = attStats.find((x) => x.id === att.id);
+            const s = periodStats.find((x) => x.id === att.id);
             return (
               <div key={att.id} className="flex items-center gap-4 p-3 rounded-lg bg-secondary/30 animate-fade-in" style={{ animationDelay: `${i * 50}ms` }}>
                 <div className={cn("h-10 w-10 rounded-full flex items-center justify-center font-bold text-sm",
