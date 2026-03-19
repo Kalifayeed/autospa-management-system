@@ -57,7 +57,8 @@ export default function NewTransactionPage() {
   const total = serviceTotal + (includesCarpet ? carpetAmount : 0);
   const plateValid = plateNumber.replace(/\s/g, "").length >= 7;
 
-  const toggleService = (id: string) => setSelectedServices((prev) => prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]);
+  // Only allow one wash service at a time per plate number
+  const toggleService = (id: string) => setSelectedServices((prev) => prev.includes(id) ? [] : [id]);
   const toggleAddOn = (id: string) => setSelectedAddOns((prev) => prev.includes(id) ? prev.filter((a) => a !== id) : [...prev, id]);
 
   const handleSubmit = async () => {
@@ -161,7 +162,7 @@ export default function NewTransactionPage() {
       {/* Services */}
       {includesCarWash && (
         <section className="glass-card rounded-xl p-5 space-y-4">
-          <h2 className="font-display font-semibold text-card-foreground">Select Services *</h2>
+          <h2 className="font-display font-semibold text-card-foreground">Select Service * <span className="text-xs text-muted-foreground font-normal">(one per plate)</span></h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {services.map((service) => {
               const selected = selectedServices.includes(service.id);
