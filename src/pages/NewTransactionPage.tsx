@@ -162,7 +162,7 @@ export default function NewTransactionPage() {
       {/* Services */}
       {includesCarWash && (
         <section className="glass-card rounded-xl p-5 space-y-4">
-          <h2 className="font-display font-semibold text-card-foreground">Select Services *</h2>
+          <h2 className="font-display font-semibold text-card-foreground">Select Service * <span className="text-xs text-muted-foreground font-normal">(one per plate)</span></h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {services.map((service) => {
               const selected = selectedServices.includes(service.id);
