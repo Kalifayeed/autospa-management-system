@@ -57,7 +57,8 @@ export default function NewTransactionPage() {
   const total = serviceTotal + (includesCarpet ? carpetAmount : 0);
   const plateValid = plateNumber.replace(/\s/g, "").length >= 7;
 
-  const toggleService = (id: string) => setSelectedServices((prev) => prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]);
+  // Only allow one wash service at a time per plate number
+  const toggleService = (id: string) => setSelectedServices((prev) => prev.includes(id) ? [] : [id]);
   const toggleAddOn = (id: string) => setSelectedAddOns((prev) => prev.includes(id) ? prev.filter((a) => a !== id) : [...prev, id]);
 
   const handleSubmit = async () => {
