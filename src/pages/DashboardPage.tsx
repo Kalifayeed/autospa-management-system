@@ -52,7 +52,7 @@ export default function DashboardPage() {
           )}
         </div>
 
-        <div className="glass-card rounded-xl p-5">
+        <div className="glass-card-premium rounded-xl p-5 opacity-0 animate-fade-in" style={{ animationDelay: "300ms", animationFillMode: "forwards" }}>
           <h3 className="font-display font-semibold text-card-foreground mb-4">Payment Methods</h3>
           {stats.revenueByPayment.length > 0 ? (
             <ResponsiveContainer width="100%" height={240}>
