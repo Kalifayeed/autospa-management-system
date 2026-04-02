@@ -26,11 +26,11 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4">
-        <MetricCard title="Today's Vehicles" value={stats.totalVehiclesToday} icon={Car} variant="primary" />
-        <MetricCard title="This Week" value={stats.totalVehiclesWeek} icon={CalendarDays} variant="primary" />
-        <MetricCard title="This Month" value={stats.totalVehiclesMonth} icon={CalendarRange} variant="primary" />
-        <MetricCard title="Total Revenue" value={`KES ${stats.totalRevenue.toLocaleString()}`} icon={DollarSign} variant="success" />
-        <MetricCard title={`Commission (${COMMISSION_RATE * 100}%)`} value={`KES ${stats.totalCommission.toLocaleString()}`} icon={Wallet} variant="warning" />
+        <MetricCard title="Today's Vehicles" value={stats.totalVehiclesToday} icon={Car} variant="primary" index={0} />
+        <MetricCard title="This Week" value={stats.totalVehiclesWeek} icon={CalendarDays} variant="primary" index={1} />
+        <MetricCard title="This Month" value={stats.totalVehiclesMonth} icon={CalendarRange} variant="primary" index={2} />
+        <MetricCard title="Total Revenue" value={`KES ${stats.totalRevenue.toLocaleString()}`} icon={DollarSign} variant="success" index={3} />
+        <MetricCard title={`Commission (${COMMISSION_RATE * 100}%)`} value={`KES ${stats.totalCommission.toLocaleString()}`} icon={Wallet} variant="warning" index={4} />
       </div>
 
       {/* Charts */}
