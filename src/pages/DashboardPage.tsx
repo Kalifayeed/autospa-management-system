@@ -48,7 +48,7 @@ export default function DashboardPage() {
               </BarChart>
             </ResponsiveContainer>
           ) : (
-            <div className="h-60 flex items-center justify-center text-muted-foreground text-sm">No transactions yet today</div>
+            <div className="h-60 flex items-center justify-center text-muted-foreground text-sm">No revenue data yet today</div>
           )}
         </div>
 
