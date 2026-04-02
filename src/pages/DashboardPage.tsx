@@ -67,7 +67,7 @@ export default function DashboardPage() {
               </PieChart>
             </ResponsiveContainer>
           ) : (
-            <div className="h-60 flex items-center justify-center text-muted-foreground text-sm">No transactions yet today</div>
+            <div className="h-60 flex items-center justify-center text-muted-foreground text-sm">No payment data yet today</div>
           )}
         </div>
       </div>
