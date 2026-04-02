@@ -74,7 +74,7 @@ export default function DashboardPage() {
 
       {/* Peak Hours + Top Attendants */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div className="glass-card rounded-xl p-5">
+        <div className="glass-card-premium rounded-xl p-5 opacity-0 animate-fade-in" style={{ animationDelay: "400ms", animationFillMode: "forwards" }}>
           <h3 className="font-display font-semibold text-card-foreground mb-4 flex items-center gap-2">
             <Clock className="h-4 w-4 text-primary" /> Peak Hours
           </h3>
