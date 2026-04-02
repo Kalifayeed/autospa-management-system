@@ -131,13 +131,34 @@
 
 @layer utilities {
   .glass-card {
-    @apply bg-card/80 backdrop-blur-xl border border-border/50;
+    @apply bg-card/80 backdrop-blur-xl border border-border/50 relative;
     box-shadow: var(--shadow-card);
   }
 
   .glass-card-elevated {
-    @apply bg-card/90 backdrop-blur-xl border border-border/50;
+    @apply bg-card/90 backdrop-blur-xl border border-border/50 relative;
     box-shadow: var(--shadow-elevated);
+  }
+
+  .glass-card-premium {
+    @apply bg-card/85 backdrop-blur-2xl relative overflow-hidden;
+    box-shadow: var(--shadow-card);
+    border: 1px solid transparent;
+    background-clip: padding-box;
+    background-image: linear-gradient(hsl(var(--card) / 0.85), hsl(var(--card) / 0.85)),
+                       linear-gradient(135deg, hsl(var(--primary) / 0.15), hsl(var(--border) / 0.5), hsl(var(--primary) / 0.1));
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+  }
+
+  .glass-card-premium::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, hsl(var(--primary) / 0.2), transparent);
   }
 
   .gradient-brand {

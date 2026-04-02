@@ -26,16 +26,16 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4">
-        <MetricCard title="Today's Vehicles" value={stats.totalVehiclesToday} icon={Car} variant="primary" />
-        <MetricCard title="This Week" value={stats.totalVehiclesWeek} icon={CalendarDays} variant="primary" />
-        <MetricCard title="This Month" value={stats.totalVehiclesMonth} icon={CalendarRange} variant="primary" />
-        <MetricCard title="Total Revenue" value={`KES ${stats.totalRevenue.toLocaleString()}`} icon={DollarSign} variant="success" />
-        <MetricCard title={`Commission (${COMMISSION_RATE * 100}%)`} value={`KES ${stats.totalCommission.toLocaleString()}`} icon={Wallet} variant="warning" />
+        <MetricCard title="Today's Vehicles" value={stats.totalVehiclesToday} icon={Car} variant="primary" index={0} />
+        <MetricCard title="This Week" value={stats.totalVehiclesWeek} icon={CalendarDays} variant="primary" index={1} />
+        <MetricCard title="This Month" value={stats.totalVehiclesMonth} icon={CalendarRange} variant="primary" index={2} />
+        <MetricCard title="Total Revenue" value={`KES ${stats.totalRevenue.toLocaleString()}`} icon={DollarSign} variant="success" index={3} />
+        <MetricCard title={`Commission (${COMMISSION_RATE * 100}%)`} value={`KES ${stats.totalCommission.toLocaleString()}`} icon={Wallet} variant="warning" index={4} />
       </div>
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div className="glass-card rounded-xl p-5">
+        <div className="glass-card-premium rounded-xl p-5 opacity-0 animate-fade-in" style={{ animationDelay: "200ms", animationFillMode: "forwards" }}>
           <h3 className="font-display font-semibold text-card-foreground mb-4">Revenue by Service</h3>
           {stats.revenueByService.length > 0 ? (
             <ResponsiveContainer width="100%" height={240}>
@@ -48,11 +48,11 @@ export default function DashboardPage() {
               </BarChart>
             </ResponsiveContainer>
           ) : (
-            <div className="h-60 flex items-center justify-center text-muted-foreground text-sm">No transactions yet today</div>
+            <div className="h-60 flex items-center justify-center text-muted-foreground text-sm">No revenue data yet today</div>
           )}
         </div>
 
-        <div className="glass-card rounded-xl p-5">
+        <div className="glass-card-premium rounded-xl p-5 opacity-0 animate-fade-in" style={{ animationDelay: "300ms", animationFillMode: "forwards" }}>
           <h3 className="font-display font-semibold text-card-foreground mb-4">Payment Methods</h3>
           {stats.revenueByPayment.length > 0 ? (
             <ResponsiveContainer width="100%" height={240}>
@@ -67,14 +67,14 @@ export default function DashboardPage() {
               </PieChart>
             </ResponsiveContainer>
           ) : (
-            <div className="h-60 flex items-center justify-center text-muted-foreground text-sm">No transactions yet today</div>
+            <div className="h-60 flex items-center justify-center text-muted-foreground text-sm">No payment data yet today</div>
           )}
         </div>
       </div>
 
       {/* Peak Hours + Top Attendants */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div className="glass-card rounded-xl p-5">
+        <div className="glass-card-premium rounded-xl p-5 opacity-0 animate-fade-in" style={{ animationDelay: "400ms", animationFillMode: "forwards" }}>
           <h3 className="font-display font-semibold text-card-foreground mb-4 flex items-center gap-2">
             <Clock className="h-4 w-4 text-primary" /> Peak Hours
           </h3>
@@ -88,7 +88,7 @@ export default function DashboardPage() {
           </ResponsiveContainer>
         </div>
 
-        <div className="glass-card rounded-xl p-5">
+        <div className="glass-card-premium rounded-xl p-5 opacity-0 animate-fade-in" style={{ animationDelay: "500ms", animationFillMode: "forwards" }}>
           <h3 className="font-display font-semibold text-card-foreground mb-4">Top Attendants Today</h3>
           <div className="space-y-3">
             {stats.attendantStats.length > 0 ? (
@@ -118,7 +118,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Recent Transactions */}
-      <div className="glass-card rounded-xl p-5">
+      <div className="glass-card-premium rounded-xl p-5 opacity-0 animate-fade-in" style={{ animationDelay: "600ms", animationFillMode: "forwards" }}>
         <h3 className="font-display font-semibold text-card-foreground mb-4">Recent Transactions</h3>
         {transactions.length > 0 ? (
           <div className="overflow-x-auto">
