@@ -92,13 +92,16 @@ export default function AppSidebar() {
                 key={item.path}
                 onClick={() => handleNav(item.path)}
                 className={cn(
-                  "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all touch-target",
+                  "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 touch-target relative",
                   active
                     ? "bg-sidebar-accent text-primary"
                     : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
                 )}
               >
-                <item.icon className="h-[18px] w-[18px] flex-shrink-0" />
+                {active && (
+                  <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-primary animate-scale-in" />
+                )}
+                <item.icon className={cn("h-[18px] w-[18px] flex-shrink-0 transition-transform duration-200", active && "scale-110")} />
                 {item.label}
               </button>
             );

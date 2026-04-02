@@ -8,6 +8,7 @@ interface MetricCardProps {
   icon: LucideIcon;
   trend?: { value: number; label: string };
   variant?: "default" | "primary" | "success" | "warning" | "destructive";
+  index?: number;
 }
 
 const variantStyles = {
@@ -18,9 +19,12 @@ const variantStyles = {
   destructive: "text-destructive bg-destructive/10",
 };
 
-export default function MetricCard({ title, value, subtitle, icon: Icon, trend, variant = "default" }: MetricCardProps) {
+export default function MetricCard({ title, value, subtitle, icon: Icon, trend, variant = "default", index = 0 }: MetricCardProps) {
   return (
-    <div className="metric-card animate-fade-in">
+    <div
+      className="glass-card-premium rounded-xl p-5 transition-all duration-200 hover:scale-[1.02] opacity-0 animate-fade-in"
+      style={{ animationDelay: `${index * 80}ms`, animationFillMode: "forwards" }}
+    >
       <div className="flex items-start justify-between mb-3">
         <div className={cn("h-10 w-10 rounded-lg flex items-center justify-center", variantStyles[variant])}>
           <Icon className="h-5 w-5" />
