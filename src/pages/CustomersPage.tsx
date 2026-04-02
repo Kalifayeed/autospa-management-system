@@ -1,17 +1,25 @@
 import { useAppState } from "@/lib/app-state";
-import { Star, Phone, Car, Gift } from "lucide-react";
+import { Star, Phone, Car, Gift, Clock, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { toast } from "sonner";
+import EmptyState from "@/components/EmptyState";
 
 const FREE_WASH_THRESHOLD = 10;
 
 export default function CustomersPage() {
-  const { customers, redeemCustomerWash } = useAppState();
+  const { customers, transactions, redeemCustomerWash } = useAppState();
   const [redeeming, setRedeeming] = useState<string | null>(null);
+  const [expandedCustomer, setExpandedCustomer] = useState<string | null>(null);
 
-  // Sort by visits descending (ranking)
   const sorted = [...customers].sort((a, b) => b.visits - a.visits);
+
+  const getCustomerHistory = (plateNumber: string) => {
+    return transactions
+      .filter((tx) => tx.plateNumber.toLowerCase() === plateNumber.toLowerCase())
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .slice(0, 10);
+  };
 
   const handleRedeem = async (customerId: string) => {
     setRedeeming(customerId);
@@ -33,15 +41,21 @@ export default function CustomersPage() {
       </div>
 
       {sorted.length === 0 ? (
-        <div className="glass-card rounded-xl p-8 text-center">
-          <p className="text-muted-foreground">No customers yet. They'll appear here after transactions are processed.</p>
+        <div className="glass-card-premium rounded-xl">
+          <EmptyState type="customers" />
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {sorted.map((customer, index) => {
             const eligible = customer.visits >= FREE_WASH_THRESHOLD;
+            const isExpanded = expandedCustomer === customer.id;
+            const history = isExpanded ? getCustomerHistory(customer.plateNumber) : [];
             return (
-              <div key={customer.id} className="glass-card rounded-xl p-4 animate-fade-in">
+              <div
+                key={customer.id}
+                className="glass-card-premium rounded-xl p-4 opacity-0 animate-fade-in"
+                style={{ animationDelay: `${index * 60}ms`, animationFillMode: "forwards" }}
+              >
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-start gap-3">
                     <div className="h-8 w-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-bold shrink-0">
@@ -64,10 +78,12 @@ export default function CustomersPage() {
                     <span className="text-sm font-bold">{customer.loyaltyPoints}</span>
                   </div>
                 </div>
+
                 <div className="flex items-center justify-between text-xs text-muted-foreground">
                   <span>{customer.visits} visits</span>
                   <span>Last: {customer.lastVisit ? new Date(customer.lastVisit).toLocaleDateString() : "N/A"}</span>
                 </div>
+
                 {eligible && (
                   <div className="mt-3 p-2 rounded-lg bg-primary/10 flex items-center justify-between">
                     <span className="text-primary text-xs font-medium flex items-center gap-1.5">
@@ -83,6 +99,7 @@ export default function CustomersPage() {
                     </Button>
                   </div>
                 )}
+
                 {!eligible && (
                   <div className="mt-2">
                     <div className="flex justify-between text-xs text-muted-foreground mb-1">
@@ -95,6 +112,36 @@ export default function CustomersPage() {
                         style={{ width: `${Math.min((customer.visits / FREE_WASH_THRESHOLD) * 100, 100)}%` }}
                       />
                     </div>
+                  </div>
+                )}
+
+                {/* Visit history toggle */}
+                <button
+                  onClick={() => setExpandedCustomer(isExpanded ? null : customer.id)}
+                  className="mt-3 w-full flex items-center justify-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors py-1"
+                >
+                  <Clock className="h-3 w-3" />
+                  {isExpanded ? "Hide" : "View"} visit history
+                  {isExpanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                </button>
+
+                {isExpanded && (
+                  <div className="mt-2 space-y-1.5 animate-fade-in">
+                    {history.length > 0 ? (
+                      history.map((tx) => (
+                        <div key={tx.id} className="flex items-center justify-between text-xs bg-muted/50 rounded-lg px-3 py-2">
+                          <div>
+                            <span className="text-card-foreground font-medium">{tx.services.join(", ")}</span>
+                            <span className="text-muted-foreground ml-2">
+                              {new Date(tx.createdAt).toLocaleDateString()}
+                            </span>
+                          </div>
+                          <span className="font-medium text-card-foreground">KES {tx.total.toLocaleString()}</span>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-xs text-muted-foreground text-center py-2">No visit history found</p>
+                    )}
                   </div>
                 )}
               </div>
