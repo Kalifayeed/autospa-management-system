@@ -88,7 +88,7 @@ export default function DashboardPage() {
           </ResponsiveContainer>
         </div>
 
-        <div className="glass-card rounded-xl p-5">
+        <div className="glass-card-premium rounded-xl p-5 opacity-0 animate-fade-in" style={{ animationDelay: "500ms", animationFillMode: "forwards" }}>
           <h3 className="font-display font-semibold text-card-foreground mb-4">Top Attendants Today</h3>
           <div className="space-y-3">
             {stats.attendantStats.length > 0 ? (
