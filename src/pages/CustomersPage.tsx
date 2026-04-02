@@ -133,7 +133,7 @@ export default function CustomersPage() {
                           <div>
                             <span className="text-card-foreground font-medium">{tx.services.join(", ")}</span>
                             <span className="text-muted-foreground ml-2">
-                              {new Date(tx.createdAt).toLocaleDateString()}
+                              {new Date(tx.timestamp).toLocaleDateString()}
                             </span>
                           </div>
                           <span className="font-medium text-card-foreground">KES {tx.total.toLocaleString()}</span>
