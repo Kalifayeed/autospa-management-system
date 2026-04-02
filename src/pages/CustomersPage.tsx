@@ -17,7 +17,7 @@ export default function CustomersPage() {
   const getCustomerHistory = (plateNumber: string) => {
     return transactions
       .filter((tx) => tx.plateNumber.toLowerCase() === plateNumber.toLowerCase())
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
       .slice(0, 10);
   };
 
