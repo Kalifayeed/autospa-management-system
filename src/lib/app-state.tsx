@@ -161,8 +161,9 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
     if (data) setTransactions((prev) => [mapDbTransaction(data), ...prev]);
 
     // Upsert customer if plate number exists
-    if (tx.plateNumber && tx.plateNumber !== "CARPET") {
-      const { data: existing } = await supabase.from("customers").select("*").eq("plate_number", tx.plateNumber).maybeSingle();
+    const cleanPlate = tx.plateNumber.replace(/\s/g, "").toUpperCase();
+    if (cleanPlate && cleanPlate !== "CARPET") {
+      const { data: existing } = await supabase.from("customers").select("*").eq("plate_number", cleanPlate).maybeSingle();
       if (existing) {
         await supabase.from("customers").update({
           visits: existing.visits + 1,
