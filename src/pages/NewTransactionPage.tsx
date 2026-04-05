@@ -144,7 +144,7 @@ export default function NewTransactionPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Plate Number * <span className="text-xs text-muted-foreground">(min 7 chars)</span></Label>
-              <Input value={plateNumber} onChange={(e) => setPlateNumber(e.target.value.toUpperCase())} placeholder="e.g. KCA 123A"
+              <Input value={plateNumber} onChange={(e) => setPlateNumber(e.target.value.replace(/\s/g, "").toUpperCase())} placeholder="e.g. KCA123A"
                 className={cn("touch-target font-mono", plateNumber && !plateValid && "border-destructive")} />
               {plateNumber && !plateValid && <p className="text-xs text-destructive">Enter at least 7 characters</p>}
             </div>
