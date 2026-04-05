@@ -175,7 +175,7 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
           : c));
       } else {
         const { data: newCust } = await supabase.from("customers").insert({
-          plate_number: tx.plateNumber,
+          plate_number: cleanPlate,
           name: "",
           phone: "",
           visits: 1,
