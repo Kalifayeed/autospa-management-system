@@ -87,21 +87,46 @@ export default function ExpensesPage() {
 
       <div className="glass-card rounded-xl p-5">
         <h2 className="font-display font-semibold text-card-foreground mb-4">Expense Log</h2>
-        <div className="space-y-3">
-          {filtered.length === 0 && <p className="text-sm text-muted-foreground">No expenses for this period.</p>}
-          {filtered.map((exp) => (
-            <div key={exp.id} className="flex items-center justify-between p-3 rounded-lg bg-secondary/30 animate-fade-in">
-              <div className="flex items-center gap-3">
-                <span className={`text-xs px-2 py-1 rounded-md font-medium ${categoryColors[exp.category] || "bg-muted text-muted-foreground"}`}>{exp.category}</span>
-                <div>
-                  <p className="text-sm font-medium text-card-foreground">{exp.description}</p>
-                  <p className="text-xs text-muted-foreground">{new Date(exp.date).toLocaleDateString()}</p>
-                </div>
-              </div>
-              <p className="font-bold font-display text-destructive">-KES {exp.amount.toLocaleString()}</p>
+
+        {filtered.length === 0 && <p className="text-sm text-muted-foreground">No expenses for this period.</p>}
+
+        {filtered.length > 0 && (() => {
+          const grouped = filtered.reduce<Record<string, { total: number; items: typeof filtered }>>((acc, exp) => {
+            if (!acc[exp.category]) acc[exp.category] = { total: 0, items: [] };
+            acc[exp.category].total += exp.amount;
+            acc[exp.category].items.push(exp);
+            return acc;
+          }, {});
+
+          return (
+            <div className="space-y-4">
+              {Object.entries(grouped)
+                .sort(([, a], [, b]) => b.total - a.total)
+                .map(([category, { total, items }]) => (
+                  <details key={category} className="group rounded-lg bg-secondary/30 overflow-hidden animate-fade-in">
+                    <summary className="flex items-center justify-between p-3 cursor-pointer list-none hover:bg-secondary/50 transition-colors">
+                      <div className="flex items-center gap-3">
+                        <span className={`text-xs px-2 py-1 rounded-md font-medium ${categoryColors[category] || "bg-muted text-muted-foreground"}`}>{category}</span>
+                        <span className="text-sm text-muted-foreground">{items.length} {items.length === 1 ? "entry" : "entries"}</span>
+                      </div>
+                      <p className="font-bold font-display text-destructive">-KES {total.toLocaleString()}</p>
+                    </summary>
+                    <div className="border-t border-border/50 divide-y divide-border/30">
+                      {items.map((exp) => (
+                        <div key={exp.id} className="flex items-center justify-between px-4 py-2">
+                          <div>
+                            <p className="text-sm font-medium text-card-foreground">{exp.description}</p>
+                            <p className="text-xs text-muted-foreground">{new Date(exp.date).toLocaleDateString()}</p>
+                          </div>
+                          <p className="text-sm font-medium text-destructive">-KES {exp.amount.toLocaleString()}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </details>
+                ))}
             </div>
-          ))}
-        </div>
+          );
+        })()}
       </div>
     </div>
   );
