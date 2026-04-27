@@ -71,6 +71,13 @@ export interface Customer {
 
 export const COMMISSION_RATE = 0.3;
 
+/**
+ * Single source of truth for commission calculation.
+ * Returns an unrounded number — round only at display time so
+ * sums of per-attendant commissions always equal the total commission.
+ */
+export const calcCommission = (sales: number) => sales * COMMISSION_RATE;
+
 export const EXPENSE_CATEGORIES = [
   "Water",
   "Electricity",
