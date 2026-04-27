@@ -1,6 +1,7 @@
 import { BarChart3, Download, TrendingUp, TrendingDown, DollarSign, Wallet, Receipt, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAppState } from "@/lib/app-state";
+import { COMMISSION_RATE } from "@/lib/mock-data";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { useState, useMemo } from "react";
 
@@ -31,7 +32,7 @@ export default function ReportsPage() {
 
   const stats = useMemo(() => {
     const totalRevenue = filtered.reduce((s, tx) => s + tx.total, 0);
-    const totalCommission = Math.round(totalRevenue * 0.3);
+    const totalCommission = totalRevenue * COMMISSION_RATE;
     const totalExpenses = filteredExpenses.reduce((s, e) => s + e.amount, 0);
     const totalPayouts = totalCommission; // commission is the payout to attendants
     const totalDeductions = totalExpenses + totalPayouts;
