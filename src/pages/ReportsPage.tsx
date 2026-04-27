@@ -151,7 +151,7 @@ export default function ReportsPage() {
             )}
             <div className="flex justify-between items-center pt-2 border-t border-destructive/20">
               <span className="text-sm font-medium text-muted-foreground">Total Deductions</span>
-              <span className="font-bold text-card-foreground">KES {stats.totalDeductions.toLocaleString()}</span>
+              <span className="font-bold text-card-foreground">KES {Math.round(stats.totalDeductions).toLocaleString()}</span>
             </div>
           </div>
         </div>
@@ -164,7 +164,7 @@ export default function ReportsPage() {
               <span className="font-semibold text-card-foreground">Net Profit</span>
             </div>
             <span className={`font-bold text-xl ${stats.netProfit >= 0 ? "text-success" : "text-destructive"}`}>
-              KES {stats.netProfit.toLocaleString()}
+              KES {Math.round(stats.netProfit).toLocaleString()}
             </span>
           </div>
         </div>
@@ -198,7 +198,7 @@ export default function ReportsPage() {
             { label: "Vehicles", value: String(stats.vehicleCount), detail: periodLabel },
             { label: "Peak Hour", value: stats.peakHour && stats.peakHour.vehicles > 0 ? stats.peakHour.hour : "N/A", detail: stats.peakHour && stats.peakHour.vehicles > 0 ? `${stats.peakHour.vehicles} vehicles` : "No data yet" },
             { label: "Top Service", value: stats.topService, detail: "By revenue" },
-            { label: "Total Revenue", value: `KES ${stats.totalRevenue.toLocaleString()}`, detail: `Commission: KES ${stats.totalCommission.toLocaleString()}` },
+            { label: "Total Revenue", value: `KES ${stats.totalRevenue.toLocaleString()}`, detail: `Commission: KES ${Math.round(stats.totalCommission).toLocaleString()}` },
           ].map((insight) => (
             <div key={insight.label} className="p-3 rounded-lg bg-secondary/30">
               <p className="text-xs text-muted-foreground">{insight.label}</p>
