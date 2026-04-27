@@ -45,7 +45,7 @@ export default function AttendantsPage() {
       name: a.name,
       vehiclesHandled: attMap[a.id]?.vehicles || 0,
       totalSales: attMap[a.id]?.sales || 0,
-      commission: Math.round((attMap[a.id]?.sales || 0) * COMMISSION_RATE),
+      commission: (attMap[a.id]?.sales || 0) * COMMISSION_RATE,
     }));
   }, [transactions, attendants, period]);
 
@@ -137,7 +137,7 @@ export default function AttendantsPage() {
                 <div className="text-right flex items-center gap-3">
                   <div>
                     <p className="font-bold font-display text-card-foreground">KES {(s?.totalSales || 0).toLocaleString()}</p>
-                    <p className="text-xs text-success">Com: KES {(s?.commission || 0).toLocaleString()}</p>
+                    <p className="text-xs text-success">Com: KES {Math.round(s?.commission || 0).toLocaleString()}</p>
                   </div>
                   <button onClick={() => openEdit(att)} className="h-8 w-8 rounded-lg bg-secondary flex items-center justify-center hover:bg-secondary/80">
                     <Pencil className="h-3.5 w-3.5 text-muted-foreground" />

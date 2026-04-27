@@ -1,6 +1,7 @@
 import { BarChart3, Download, TrendingUp, TrendingDown, DollarSign, Wallet, Receipt, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAppState } from "@/lib/app-state";
+import { COMMISSION_RATE } from "@/lib/mock-data";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { useState, useMemo } from "react";
 
@@ -31,7 +32,7 @@ export default function ReportsPage() {
 
   const stats = useMemo(() => {
     const totalRevenue = filtered.reduce((s, tx) => s + tx.total, 0);
-    const totalCommission = Math.round(totalRevenue * 0.3);
+    const totalCommission = totalRevenue * COMMISSION_RATE;
     const totalExpenses = filteredExpenses.reduce((s, e) => s + e.amount, 0);
     const totalPayouts = totalCommission; // commission is the payout to attendants
     const totalDeductions = totalExpenses + totalPayouts;
@@ -128,9 +129,9 @@ export default function ReportsPage() {
           <div className="bg-destructive/5 rounded-lg p-3 border border-destructive/20 space-y-2">
             <div className="flex justify-between items-center">
               <span className="text-sm text-muted-foreground flex items-center gap-1.5">
-                <Users className="h-3.5 w-3.5" /> Attendant Payouts (30% commission)
+                <Users className="h-3.5 w-3.5" /> Attendant Payouts ({COMMISSION_RATE * 100}% commission)
               </span>
-              <span className="font-semibold text-card-foreground">KES {stats.totalPayouts.toLocaleString()}</span>
+              <span className="font-semibold text-card-foreground">KES {Math.round(stats.totalPayouts).toLocaleString()}</span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-sm text-muted-foreground flex items-center gap-1.5">
@@ -150,7 +151,7 @@ export default function ReportsPage() {
             )}
             <div className="flex justify-between items-center pt-2 border-t border-destructive/20">
               <span className="text-sm font-medium text-muted-foreground">Total Deductions</span>
-              <span className="font-bold text-card-foreground">KES {stats.totalDeductions.toLocaleString()}</span>
+              <span className="font-bold text-card-foreground">KES {Math.round(stats.totalDeductions).toLocaleString()}</span>
             </div>
           </div>
         </div>
@@ -163,7 +164,7 @@ export default function ReportsPage() {
               <span className="font-semibold text-card-foreground">Net Profit</span>
             </div>
             <span className={`font-bold text-xl ${stats.netProfit >= 0 ? "text-success" : "text-destructive"}`}>
-              KES {stats.netProfit.toLocaleString()}
+              KES {Math.round(stats.netProfit).toLocaleString()}
             </span>
           </div>
         </div>
@@ -197,7 +198,7 @@ export default function ReportsPage() {
             { label: "Vehicles", value: String(stats.vehicleCount), detail: periodLabel },
             { label: "Peak Hour", value: stats.peakHour && stats.peakHour.vehicles > 0 ? stats.peakHour.hour : "N/A", detail: stats.peakHour && stats.peakHour.vehicles > 0 ? `${stats.peakHour.vehicles} vehicles` : "No data yet" },
             { label: "Top Service", value: stats.topService, detail: "By revenue" },
-            { label: "Total Revenue", value: `KES ${stats.totalRevenue.toLocaleString()}`, detail: `Commission: KES ${stats.totalCommission.toLocaleString()}` },
+            { label: "Total Revenue", value: `KES ${stats.totalRevenue.toLocaleString()}`, detail: `Commission: KES ${Math.round(stats.totalCommission).toLocaleString()}` },
           ].map((insight) => (
             <div key={insight.label} className="p-3 rounded-lg bg-secondary/30">
               <p className="text-xs text-muted-foreground">{insight.label}</p>

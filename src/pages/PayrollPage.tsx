@@ -53,7 +53,7 @@ export default function PayrollPage() {
       name: a.name,
       vehiclesHandled: attMap[a.id]?.vehicles || 0,
       totalSales: attMap[a.id]?.sales || 0,
-      commission: Math.round((attMap[a.id]?.sales || 0) * COMMISSION_RATE),
+      commission: (attMap[a.id]?.sales || 0) * COMMISSION_RATE,
     }));
 
     return {
@@ -93,7 +93,7 @@ export default function PayrollPage() {
       <div className="grid grid-cols-2 gap-3">
         <MetricCard
           title={`Total Commissions ${isSingleDay ? (isToday ? "Today" : format(effectiveFrom ?? new Date(), "MMM d")) : ""}`}
-          value={`KES ${rangeStats.totalCommissions.toLocaleString()}`}
+          value={`KES ${Math.round(rangeStats.totalCommissions).toLocaleString()}`}
           icon={Wallet}
           variant="primary"
         />
@@ -176,7 +176,7 @@ export default function PayrollPage() {
                   <td className="py-2.5 px-4 sm:px-0 font-medium text-card-foreground">{att.name}</td>
                   <td className="py-2.5 px-2 sm:px-0 text-right text-muted-foreground">{att.vehiclesHandled}</td>
                   <td className="py-2.5 px-2 sm:px-0 text-right text-muted-foreground">KES {att.totalSales.toLocaleString()}</td>
-                  <td className="py-2.5 px-4 sm:px-0 text-right font-bold text-success">KES {att.commission.toLocaleString()}</td>
+                  <td className="py-2.5 px-4 sm:px-0 text-right font-bold text-success">KES {Math.round(att.commission).toLocaleString()}</td>
                 </tr>
               ))}
             </tbody>
@@ -185,7 +185,7 @@ export default function PayrollPage() {
                 <td className="py-2.5 px-4 sm:px-0 font-semibold text-card-foreground">Total</td>
                 <td className="py-2.5 px-2 sm:px-0 text-right text-muted-foreground">{rangeStats.totalVehicles}</td>
                 <td className="py-2.5 px-2 sm:px-0 text-right text-muted-foreground">KES {rangeStats.totalSales.toLocaleString()}</td>
-                <td className="py-2.5 px-4 sm:px-0 text-right font-bold text-success">KES {rangeStats.totalCommissions.toLocaleString()}</td>
+                <td className="py-2.5 px-4 sm:px-0 text-right font-bold text-success">KES {Math.round(rangeStats.totalCommissions).toLocaleString()}</td>
               </tr>
             </tfoot>
           </table>

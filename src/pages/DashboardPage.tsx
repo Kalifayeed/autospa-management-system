@@ -30,7 +30,7 @@ export default function DashboardPage() {
         <MetricCard title="This Week" value={stats.totalVehiclesWeek} icon={CalendarDays} variant="primary" index={1} />
         <MetricCard title="This Month" value={stats.totalVehiclesMonth} icon={CalendarRange} variant="primary" index={2} />
         <MetricCard title="Total Revenue" value={`KES ${stats.totalRevenue.toLocaleString()}`} icon={DollarSign} variant="success" index={3} />
-        <MetricCard title={`Commission (${COMMISSION_RATE * 100}%)`} value={`KES ${stats.totalCommission.toLocaleString()}`} icon={Wallet} variant="warning" index={4} />
+        <MetricCard title={`Commission (${COMMISSION_RATE * 100}%)`} value={`KES ${Math.round(stats.totalCommission).toLocaleString()}`} icon={Wallet} variant="warning" index={4} />
       </div>
 
       {/* Charts */}
@@ -106,7 +106,7 @@ export default function DashboardPage() {
                     </div>
                     <div className="text-right">
                       <p className="text-sm font-semibold text-card-foreground">KES {att.totalSales.toLocaleString()}</p>
-                      <p className="text-xs text-success">Com: KES {att.commission.toLocaleString()}</p>
+                      <p className="text-xs text-success">Com: KES {Math.round(att.commission).toLocaleString()}</p>
                     </div>
                   </div>
                 ))
