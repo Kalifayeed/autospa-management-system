@@ -53,7 +53,7 @@ export default function PayrollPage() {
       name: a.name,
       vehiclesHandled: attMap[a.id]?.vehicles || 0,
       totalSales: attMap[a.id]?.sales || 0,
-      commission: Math.round((attMap[a.id]?.sales || 0) * COMMISSION_RATE),
+      commission: (attMap[a.id]?.sales || 0) * COMMISSION_RATE,
     }));
 
     return {

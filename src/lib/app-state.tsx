@@ -255,7 +255,7 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
     const monthTxs = transactions.filter((tx) => isSameMonth(new Date(tx.timestamp), now));
 
     const totalRevenue = todayTxs.reduce((s, tx) => s + tx.total, 0);
-    const totalCommission = Math.round(totalRevenue * COMMISSION_RATE);
+    const totalCommission = totalRevenue * COMMISSION_RATE;
 
     const serviceMap: Record<string, number> = {};
     todayTxs.forEach((tx) => {
@@ -294,7 +294,7 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
       name: a.name,
       vehiclesHandled: attMap[a.id]?.vehicles || 0,
       totalSales: attMap[a.id]?.sales || 0,
-      commission: Math.round((attMap[a.id]?.sales || 0) * COMMISSION_RATE),
+      commission: (attMap[a.id]?.sales || 0) * COMMISSION_RATE,
     }));
 
     return {
