@@ -129,9 +129,9 @@ export default function ReportsPage() {
           <div className="bg-destructive/5 rounded-lg p-3 border border-destructive/20 space-y-2">
             <div className="flex justify-between items-center">
               <span className="text-sm text-muted-foreground flex items-center gap-1.5">
-                <Users className="h-3.5 w-3.5" /> Attendant Payouts (30% commission)
+                <Users className="h-3.5 w-3.5" /> Attendant Payouts ({COMMISSION_RATE * 100}% commission)
               </span>
-              <span className="font-semibold text-card-foreground">KES {stats.totalPayouts.toLocaleString()}</span>
+              <span className="font-semibold text-card-foreground">KES {Math.round(stats.totalPayouts).toLocaleString()}</span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-sm text-muted-foreground flex items-center gap-1.5">
