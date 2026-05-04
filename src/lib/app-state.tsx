@@ -265,8 +265,44 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
     const weekTxs = transactions.filter((tx) => isWithinWeek(new Date(tx.timestamp), now));
     const monthTxs = transactions.filter((tx) => isSameMonth(new Date(tx.timestamp), now));
 
+    // Comparison baselines
+    const yesterday = new Date(now); yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayTxs = transactions.filter((tx) => isSameDay(new Date(tx.timestamp), yesterday));
+
+    const lastWeekStart = new Date(now); lastWeekStart.setDate(lastWeekStart.getDate() - 14);
+    const lastWeekEnd = new Date(now); lastWeekEnd.setDate(lastWeekEnd.getDate() - 7);
+    const lastWeekTxs = transactions.filter((tx) => {
+      const d = new Date(tx.timestamp);
+      return d >= lastWeekStart && d < lastWeekEnd;
+    });
+
+    const lastMonthRef = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const lastMonthTxs = transactions.filter((tx) => isSameMonth(new Date(tx.timestamp), lastMonthRef));
+
     const totalRevenue = todayTxs.reduce((s, tx) => s + tx.total, 0);
     const totalCommission = totalRevenue * COMMISSION_RATE;
+    const yesterdayRevenue = yesterdayTxs.reduce((s, tx) => s + tx.total, 0);
+    const yesterdayCommission = yesterdayRevenue * COMMISSION_RATE;
+
+    const pctChange = (curr: number, prev: number): number | null => {
+      if (prev === 0) return curr === 0 ? 0 : null;
+      return Math.round(((curr - prev) / prev) * 100);
+    };
+
+    const vehiclesTodayChange = pctChange(todayTxs.length, yesterdayTxs.length);
+    const vehiclesWeekChange = pctChange(weekTxs.length, lastWeekTxs.length);
+    const vehiclesMonthChange = pctChange(monthTxs.length, lastMonthTxs.length);
+    const revenueChange = pctChange(totalRevenue, yesterdayRevenue);
+    const commissionChange = pctChange(totalCommission, yesterdayCommission);
+
+    // Month forecast (linear pace)
+    const monthRevenueSoFar = monthTxs.reduce((s, tx) => s + tx.total, 0);
+    const monthVehiclesSoFar = monthTxs.length;
+    const dayOfMonth = now.getDate();
+    const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+    const pace = dayOfMonth > 0 ? dayOfMonth : 1;
+    const monthForecastRevenue = (monthRevenueSoFar / pace) * daysInMonth;
+    const monthForecastVehicles = (monthVehiclesSoFar / pace) * daysInMonth;
 
     const serviceMap: Record<string, number> = {};
     todayTxs.forEach((tx) => {
@@ -314,6 +350,15 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
       totalVehiclesMonth: monthTxs.length,
       totalRevenue,
       totalCommission,
+      vehiclesTodayChange,
+      vehiclesWeekChange,
+      vehiclesMonthChange,
+      revenueChange,
+      commissionChange,
+      monthForecastRevenue,
+      monthForecastVehicles,
+      monthRevenueSoFar,
+      monthVehiclesSoFar,
       revenueByService,
       revenueByPayment,
       peakHours,
