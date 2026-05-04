@@ -1,4 +1,4 @@
-import { Car, DollarSign, Wallet, CalendarDays, CalendarRange, Clock } from "lucide-react";
+import { Car, DollarSign, Wallet, CalendarDays, CalendarRange, Clock, TrendingUp } from "lucide-react";
 import MetricCard from "@/components/MetricCard";
 import { useAuth } from "@/lib/auth-context";
 import { useAppState } from "@/lib/app-state";
