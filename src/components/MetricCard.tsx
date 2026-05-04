@@ -6,7 +6,7 @@ interface MetricCardProps {
   value: string | number;
   subtitle?: string;
   icon: LucideIcon;
-  trend?: { value: number; label: string };
+  trend?: { value: number | null; label?: string };
   variant?: "default" | "primary" | "success" | "warning" | "destructive";
   index?: number;
 }
