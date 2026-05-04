@@ -22,6 +22,17 @@ interface AppState {
     totalVehiclesMonth: number;
     totalRevenue: number;
     totalCommission: number;
+    // Comparison vs previous period (percent change, can be null when no baseline)
+    vehiclesTodayChange: number | null;
+    vehiclesWeekChange: number | null;
+    vehiclesMonthChange: number | null;
+    revenueChange: number | null;
+    commissionChange: number | null;
+    // Forecast for current month based on daily pace so far
+    monthForecastRevenue: number;
+    monthForecastVehicles: number;
+    monthRevenueSoFar: number;
+    monthVehiclesSoFar: number;
     revenueByService: { name: string; revenue: number }[];
     revenueByPayment: { name: string; value: number }[];
     peakHours: { hour: string; vehicles: number }[];
