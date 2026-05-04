@@ -118,35 +118,77 @@ export default function AttendantsPage() {
             </TabsList>
           </Tabs>
         </div>
-        <div className="space-y-3">
-          {sorted.map((att, i) => {
-            const s = periodStats.find((x) => x.id === att.id);
-            return (
-              <div key={att.id} className="flex items-center gap-4 p-3 rounded-lg bg-secondary/30 animate-fade-in" style={{ animationDelay: `${i * 50}ms` }}>
-                <div className={cn("h-10 w-10 rounded-full flex items-center justify-center font-bold text-sm",
-                  i === 0 ? "bg-warning/20 text-warning" : i === 1 ? "bg-muted text-muted-foreground" : i === 2 ? "bg-warning/10 text-warning/70" : "bg-secondary text-secondary-foreground")}>
-                  #{i + 1}
+        {(() => {
+          const ranked = sorted.filter((a) => (periodStats.find((s) => s.id === a.id)?.totalSales || 0) > 0);
+          const top3 = ranked.slice(0, 3);
+          const rest = sorted.filter((a) => !top3.find((t) => t.id === a.id));
+          const medals = ["🥇", "🥈", "🥉"];
+          const medalStyles = [
+            "from-warning/30 to-warning/5 border-warning/40",
+            "from-muted-foreground/20 to-muted/5 border-muted-foreground/30",
+            "from-amber-700/20 to-amber-900/5 border-amber-700/30",
+          ];
+          return (
+            <>
+              {top3.length > 0 && (
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+                  {top3.map((att, i) => {
+                    const s = periodStats.find((x) => x.id === att.id);
+                    return (
+                      <div
+                        key={att.id}
+                        className={cn("relative rounded-xl p-4 bg-gradient-to-br border animate-fade-in", medalStyles[i])}
+                        style={{ animationDelay: `${i * 80}ms` }}
+                      >
+                        <div className="absolute -top-3 -left-2 text-3xl drop-shadow-md">{medals[i]}</div>
+                        <div className="flex items-center justify-between mb-2 pl-7">
+                          <p className="font-display font-semibold text-card-foreground truncate">{att.name}</p>
+                          <button onClick={() => openEdit(att)} className="h-7 w-7 rounded-md bg-background/40 flex items-center justify-center hover:bg-background/70">
+                            <Pencil className="h-3 w-3 text-muted-foreground" />
+                          </button>
+                        </div>
+                        <p className="text-2xl font-bold font-display text-card-foreground">KES {(s?.totalSales || 0).toLocaleString()}</p>
+                        <div className="flex items-center justify-between text-xs mt-1">
+                          <span className="text-muted-foreground">{s?.vehiclesHandled || 0} vehicles</span>
+                          <span className="text-success font-medium">Com: KES {Math.round(s?.commission || 0).toLocaleString()}</span>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-card-foreground">{att.name}</p>
-                  <div className="flex items-center gap-3 text-xs text-muted-foreground mt-0.5">
-                    <span>{s?.vehiclesHandled || 0} vehicles</span>
-                    <span className={cn("px-1.5 py-0.5 rounded", att.status === "active" ? "bg-success/10 text-success" : "bg-muted text-muted-foreground")}>{att.status}</span>
-                  </div>
-                </div>
-                <div className="text-right flex items-center gap-3">
-                  <div>
-                    <p className="font-bold font-display text-card-foreground">KES {(s?.totalSales || 0).toLocaleString()}</p>
-                    <p className="text-xs text-success">Com: KES {Math.round(s?.commission || 0).toLocaleString()}</p>
-                  </div>
-                  <button onClick={() => openEdit(att)} className="h-8 w-8 rounded-lg bg-secondary flex items-center justify-center hover:bg-secondary/80">
-                    <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
-                  </button>
-                </div>
+              )}
+              <div className="space-y-3">
+                {rest.map((att, i) => {
+                  const s = periodStats.find((x) => x.id === att.id);
+                  const rank = sorted.findIndex((x) => x.id === att.id) + 1;
+                  return (
+                    <div key={att.id} className="flex items-center gap-4 p-3 rounded-lg bg-secondary/30 animate-fade-in" style={{ animationDelay: `${i * 50}ms` }}>
+                      <div className="h-10 w-10 rounded-full flex items-center justify-center font-bold text-sm bg-secondary text-secondary-foreground">
+                        #{rank}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-card-foreground">{att.name}</p>
+                        <div className="flex items-center gap-3 text-xs text-muted-foreground mt-0.5">
+                          <span>{s?.vehiclesHandled || 0} vehicles</span>
+                          <span className={cn("px-1.5 py-0.5 rounded", att.status === "active" ? "bg-success/10 text-success" : "bg-muted text-muted-foreground")}>{att.status}</span>
+                        </div>
+                      </div>
+                      <div className="text-right flex items-center gap-3">
+                        <div>
+                          <p className="font-bold font-display text-card-foreground">KES {(s?.totalSales || 0).toLocaleString()}</p>
+                          <p className="text-xs text-success">Com: KES {Math.round(s?.commission || 0).toLocaleString()}</p>
+                        </div>
+                        <button onClick={() => openEdit(att)} className="h-8 w-8 rounded-lg bg-secondary flex items-center justify-center hover:bg-secondary/80">
+                          <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-            );
-          })}
-        </div>
+            </>
+          );
+        })()}
       </div>
     </div>
   );

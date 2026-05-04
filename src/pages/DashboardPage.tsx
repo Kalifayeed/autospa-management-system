@@ -1,4 +1,4 @@
-import { Car, DollarSign, Wallet, CalendarDays, CalendarRange, Clock } from "lucide-react";
+import { Car, DollarSign, Wallet, CalendarDays, CalendarRange, Clock, TrendingUp } from "lucide-react";
 import MetricCard from "@/components/MetricCard";
 import { useAuth } from "@/lib/auth-context";
 import { useAppState } from "@/lib/app-state";
@@ -26,11 +26,43 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4">
-        <MetricCard title="Today's Vehicles" value={stats.totalVehiclesToday} icon={Car} variant="primary" index={0} />
-        <MetricCard title="This Week" value={stats.totalVehiclesWeek} icon={CalendarDays} variant="primary" index={1} />
-        <MetricCard title="This Month" value={stats.totalVehiclesMonth} icon={CalendarRange} variant="primary" index={2} />
-        <MetricCard title="Total Revenue" value={`KES ${stats.totalRevenue.toLocaleString()}`} icon={DollarSign} variant="success" index={3} />
-        <MetricCard title={`Commission (${COMMISSION_RATE * 100}%)`} value={`KES ${Math.round(stats.totalCommission).toLocaleString()}`} icon={Wallet} variant="warning" index={4} />
+        <MetricCard title="Today's Vehicles" value={stats.totalVehiclesToday} icon={Car} variant="primary" index={0}
+          trend={{ value: stats.vehiclesTodayChange, label: "vs yesterday" }} />
+        <MetricCard title="This Week" value={stats.totalVehiclesWeek} icon={CalendarDays} variant="primary" index={1}
+          trend={{ value: stats.vehiclesWeekChange, label: "vs last week" }} />
+        <MetricCard title="This Month" value={stats.totalVehiclesMonth} icon={CalendarRange} variant="primary" index={2}
+          trend={{ value: stats.vehiclesMonthChange, label: "vs last month" }} />
+        <MetricCard title="Today's Revenue" value={`KES ${stats.totalRevenue.toLocaleString()}`} icon={DollarSign} variant="success" index={3}
+          trend={{ value: stats.revenueChange, label: "vs yesterday" }} />
+        <MetricCard title={`Commission (${COMMISSION_RATE * 100}%)`} value={`KES ${Math.round(stats.totalCommission).toLocaleString()}`} icon={Wallet} variant="warning" index={4}
+          trend={{ value: stats.commissionChange, label: "vs yesterday" }} />
+      </div>
+
+      {/* Monthly Forecast */}
+      <div className="glass-card-premium rounded-xl p-5 opacity-0 animate-fade-in" style={{ animationDelay: "150ms", animationFillMode: "forwards" }}>
+        <div className="flex items-start justify-between gap-4 flex-wrap">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-lg flex items-center justify-center text-primary bg-primary/10">
+              <TrendingUp className="h-5 w-5" />
+            </div>
+            <div>
+              <h3 className="font-display font-semibold text-card-foreground">Monthly Forecast</h3>
+              <p className="text-xs text-muted-foreground">Projected based on current daily pace</p>
+            </div>
+          </div>
+          <div className="flex gap-6">
+            <div>
+              <p className="text-xs text-muted-foreground">Projected Revenue</p>
+              <p className="text-xl font-bold font-display text-card-foreground">KES {Math.round(stats.monthForecastRevenue).toLocaleString()}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">So far: KES {Math.round(stats.monthRevenueSoFar).toLocaleString()}</p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Projected Vehicles</p>
+              <p className="text-xl font-bold font-display text-card-foreground">{Math.round(stats.monthForecastVehicles).toLocaleString()}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">So far: {stats.monthVehiclesSoFar}</p>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Charts */}

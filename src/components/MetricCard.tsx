@@ -6,7 +6,7 @@ interface MetricCardProps {
   value: string | number;
   subtitle?: string;
   icon: LucideIcon;
-  trend?: { value: number; label: string };
+  trend?: { value: number | null; label?: string };
   variant?: "default" | "primary" | "success" | "warning" | "destructive";
   index?: number;
 }
@@ -29,9 +29,15 @@ export default function MetricCard({ title, value, subtitle, icon: Icon, trend, 
         <div className={cn("h-10 w-10 rounded-lg flex items-center justify-center", variantStyles[variant])}>
           <Icon className="h-5 w-5" />
         </div>
-        {trend && (
-          <span className={cn("text-xs font-medium px-2 py-0.5 rounded-full", trend.value >= 0 ? "text-success bg-success/10" : "text-destructive bg-destructive/10")}>
-            {trend.value >= 0 ? "+" : ""}{trend.value}%
+        {trend && trend.value !== null && (
+          <span
+            className={cn(
+              "text-xs font-medium px-2 py-0.5 rounded-full",
+              trend.value > 0 ? "text-success bg-success/10" : trend.value < 0 ? "text-destructive bg-destructive/10" : "text-muted-foreground bg-muted/40"
+            )}
+            title={trend.label || "vs previous period"}
+          >
+            {trend.value > 0 ? "+" : ""}{trend.value}%
           </span>
         )}
       </div>
