@@ -28,8 +28,17 @@ const queryClient = new QueryClient();
 
 function PageLoader() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+    <div className="min-h-screen bg-background p-4 md:p-6 lg:p-8">
+      <div className="max-w-7xl mx-auto space-y-4">
+        <div className="h-8 w-64 rounded-md bg-muted animate-pulse" />
+        <div className="h-4 w-48 rounded-md bg-muted animate-pulse" />
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="h-28 rounded-xl bg-muted animate-pulse" />
+          ))}
+        </div>
+        <div className="h-64 rounded-xl bg-muted animate-pulse mt-4" />
+      </div>
     </div>
   );
 }
