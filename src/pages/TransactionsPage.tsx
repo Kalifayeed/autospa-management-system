@@ -4,11 +4,14 @@ import { Search, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { ListSkeleton } from "@/components/skeletons";
 
 export default function TransactionsPage() {
   const [search, setSearch] = useState("");
   const navigate = useNavigate();
-  const { transactions } = useAppState();
+  const { transactions, loading } = useAppState();
+
+  if (loading) return <ListSkeleton rows={6} />;
 
   const filtered = transactions.filter(
     (tx) =>

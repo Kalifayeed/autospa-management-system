@@ -9,17 +9,20 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { TableSkeleton } from "@/components/skeletons";
 
 type SelectionMode = "single" | "range";
 
 export default function PayrollPage() {
-  const { attendants, transactions } = useAppState();
+  const { attendants, transactions, loading } = useAppState();
   const [mode, setMode] = useState<SelectionMode>("single");
   const [singleDate, setSingleDate] = useState<Date>(new Date());
   const [dateRange, setDateRange] = useState<{ from: Date; to: Date }>({
     from: new Date(),
     to: new Date(),
   });
+
+  if (loading) return <TableSkeleton rows={5} />;
 
   const effectiveFrom = mode === "single" ? singleDate : dateRange.from;
   const effectiveTo = mode === "single" ? singleDate : dateRange.to;
