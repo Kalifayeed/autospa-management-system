@@ -1,6 +1,7 @@
 import { Outlet, Navigate } from "react-router-dom";
 import { useAuth } from "@/lib/auth-context";
 import AppSidebar from "./AppSidebar";
+import MobileBottomNav from "./MobileBottomNav";
 import { Loader2 } from "lucide-react";
 
 export default function AppLayout() {
@@ -21,11 +22,12 @@ export default function AppLayout() {
   return (
     <div className="min-h-screen bg-background">
       <AppSidebar />
-      <main className="md:ml-64 pt-16 md:pt-0 min-h-screen">
+      <main className="md:ml-64 pt-16 md:pt-0 pb-20 md:pb-0 min-h-screen">
         <div className="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto">
           <Outlet />
         </div>
       </main>
+      <MobileBottomNav />
     </div>
   );
 }
