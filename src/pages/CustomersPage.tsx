@@ -4,13 +4,16 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { toast } from "sonner";
 import EmptyState from "@/components/EmptyState";
+import { GridCardSkeleton } from "@/components/skeletons";
 
 const FREE_WASH_THRESHOLD = 10;
 
 export default function CustomersPage() {
-  const { customers, transactions, redeemCustomerWash } = useAppState();
+  const { customers, transactions, redeemCustomerWash, loading } = useAppState();
   const [redeeming, setRedeeming] = useState<string | null>(null);
   const [expandedCustomer, setExpandedCustomer] = useState<string | null>(null);
+
+  if (loading) return <GridCardSkeleton rows={6} />;
 
   const sorted = [...customers].sort((a, b) => b.visits - a.visits);
 

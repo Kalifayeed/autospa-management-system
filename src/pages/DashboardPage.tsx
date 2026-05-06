@@ -4,6 +4,7 @@ import { useAuth } from "@/lib/auth-context";
 import { useAppState } from "@/lib/app-state";
 import { COMMISSION_RATE } from "@/lib/mock-data";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import { DashboardSkeleton } from "@/components/skeletons";
 
 const CHART_COLORS = [
   "hsl(190, 90%, 40%)",
@@ -14,7 +15,9 @@ const CHART_COLORS = [
 
 export default function DashboardPage() {
   const { user } = useAuth();
-  const { stats, transactions } = useAppState();
+  const { stats, transactions, loading } = useAppState();
+
+  if (loading) return <DashboardSkeleton />;
 
   return (
     <div className="space-y-6">

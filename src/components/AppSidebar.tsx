@@ -15,7 +15,7 @@ import {
   Menu,
   X,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
@@ -25,6 +25,7 @@ const navItems = [
   { label: "Services", icon: Settings, path: "/services", roles: ["admin"] },
   { label: "Attendants", icon: Users, path: "/attendants", roles: ["admin"] },
   { label: "Expenses", icon: DollarSign, path: "/expenses", roles: ["admin"] },
+  { label: "Cash Reconciliation", icon: Wallet, path: "/cash-reconciliation", roles: ["admin"] },
   { label: "Payroll", icon: Wallet, path: "/payroll", roles: ["admin"] },
   { label: "Reports", icon: BarChart3, path: "/reports", roles: ["admin"] },
   { label: "Customers", icon: UserCircle, path: "/customers", roles: ["admin"] },
@@ -45,6 +46,12 @@ export default function AppSidebar() {
     navigate(path);
     setMobileOpen(false);
   };
+
+  useEffect(() => {
+    const open = () => setMobileOpen(true);
+    window.addEventListener("open-sidebar", open);
+    return () => window.removeEventListener("open-sidebar", open);
+  }, []);
 
   return (
     <>
