@@ -2,7 +2,7 @@ import { Outlet, Navigate } from "react-router-dom";
 import { useAuth } from "@/lib/auth-context";
 import AppSidebar from "./AppSidebar";
 import MobileBottomNav from "./MobileBottomNav";
-import { Loader2 } from "lucide-react";
+
 
 export default function AppLayout() {
   const { isAuthenticated, loading } = useAuth();

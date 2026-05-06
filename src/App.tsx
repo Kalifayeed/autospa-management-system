@@ -6,7 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/lib/auth-context";
 import { AppStateProvider } from "@/lib/app-state";
-import { Loader2 } from "lucide-react";
+
 
 // Lazy load all pages
 const AppLayout = lazy(() => import("@/components/AppLayout"));
