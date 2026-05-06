@@ -62,6 +62,39 @@ export type Database = {
         }
         Relationships: []
       }
+      cash_reconciliations: {
+        Row: {
+          counted_cash: number
+          created_at: string
+          date: string
+          expected_cash: number
+          id: string
+          notes: string | null
+          recorded_by_name: string
+          variance: number
+        }
+        Insert: {
+          counted_cash?: number
+          created_at?: string
+          date?: string
+          expected_cash?: number
+          id?: string
+          notes?: string | null
+          recorded_by_name?: string
+          variance?: number
+        }
+        Update: {
+          counted_cash?: number
+          created_at?: string
+          date?: string
+          expected_cash?: number
+          id?: string
+          notes?: string | null
+          recorded_by_name?: string
+          variance?: number
+        }
+        Relationships: []
+      }
       customers: {
         Row: {
           created_at: string
