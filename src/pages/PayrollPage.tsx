@@ -178,7 +178,11 @@ export default function PayrollPage() {
             <tbody>
               {rangeStats.attendantStats.map((att) => (
                 <tr key={att.id} className="border-b border-border/50">
-                  <td className="py-2.5 px-4 sm:px-0 font-medium text-card-foreground">{att.name}</td>
+                  <td className="py-2.5 px-4 sm:px-0 font-medium text-card-foreground">
+                    <button onClick={() => setViewAttendant({ id: att.id, name: att.name })} className="text-left hover:text-primary transition-colors">
+                      {att.name}
+                    </button>
+                  </td>
                   <td className="py-2.5 px-2 sm:px-0 text-right text-muted-foreground">{att.vehiclesHandled}</td>
                   <td className="py-2.5 px-2 sm:px-0 text-right text-muted-foreground">KES {att.totalSales.toLocaleString()}</td>
                   <td className="py-2.5 px-4 sm:px-0 text-right font-bold text-success">KES {Math.round(att.commission).toLocaleString()}</td>
