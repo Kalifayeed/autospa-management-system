@@ -180,7 +180,7 @@ export default function AttendantsPage() {
                         #{rank}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-card-foreground">{att.name}</p>
+                        <button onClick={() => setViewAttendant({ id: att.id, name: att.name })} className="font-medium text-card-foreground text-left hover:text-primary transition-colors">{att.name}</button>
                         <div className="flex items-center gap-3 text-xs text-muted-foreground mt-0.5">
                           <span>{s?.vehiclesHandled || 0} vehicles</span>
                           <span className={cn("px-1.5 py-0.5 rounded", att.status === "active" ? "bg-success/10 text-success" : "bg-muted text-muted-foreground")}>{att.status}</span>
