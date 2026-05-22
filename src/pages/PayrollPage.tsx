@@ -10,6 +10,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TableSkeleton } from "@/components/skeletons";
+import AttendantTransactionsDialog from "@/components/AttendantTransactionsDialog";
 
 type SelectionMode = "single" | "range";
 
