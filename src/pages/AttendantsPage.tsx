@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
+import AttendantTransactionsDialog from "@/components/AttendantTransactionsDialog";
 
 function isSameDay(d1: Date, d2: Date) { return d1.toDateString() === d2.toDateString(); }
 function isWithinWeek(d: Date, ref: Date) { const w = new Date(ref); w.setDate(w.getDate() - 7); return d >= w && d <= ref; }
@@ -23,6 +24,18 @@ export default function AttendantsPage() {
   const [formPhone, setFormPhone] = useState("");
   const [formShift, setFormShift] = useState<Attendant["shift"]>("morning");
   const [period, setPeriod] = useState<"today" | "week" | "month">("today");
+  const [viewAttendant, setViewAttendant] = useState<{ id: string; name: string } | null>(null);
+
+  const periodRange = useMemo(() => {
+    const now = new Date();
+    if (period === "today") return { from: now, to: now, label: "Today" };
+    if (period === "week") {
+      const from = new Date(now); from.setDate(from.getDate() - 7);
+      return { from, to: now, label: "This Week" };
+    }
+    const from = new Date(now.getFullYear(), now.getMonth(), 1);
+    return { from, to: now, label: "This Month" };
+  }, [period]);
 
   const periodStats = useMemo(() => {
     const now = new Date();
@@ -142,7 +155,7 @@ export default function AttendantsPage() {
                       >
                         <div className="absolute -top-3 -left-2 text-3xl drop-shadow-md">{medals[i]}</div>
                         <div className="flex items-center justify-between mb-2 pl-7">
-                          <p className="font-display font-semibold text-card-foreground truncate">{att.name}</p>
+                          <button onClick={() => setViewAttendant({ id: att.id, name: att.name })} className="font-display font-semibold text-card-foreground truncate text-left hover:text-primary transition-colors">{att.name}</button>
                           <button onClick={() => openEdit(att)} className="h-7 w-7 rounded-md bg-background/40 flex items-center justify-center hover:bg-background/70">
                             <Pencil className="h-3 w-3 text-muted-foreground" />
                           </button>
@@ -167,7 +180,7 @@ export default function AttendantsPage() {
                         #{rank}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-card-foreground">{att.name}</p>
+                        <button onClick={() => setViewAttendant({ id: att.id, name: att.name })} className="font-medium text-card-foreground text-left hover:text-primary transition-colors">{att.name}</button>
                         <div className="flex items-center gap-3 text-xs text-muted-foreground mt-0.5">
                           <span>{s?.vehiclesHandled || 0} vehicles</span>
                           <span className={cn("px-1.5 py-0.5 rounded", att.status === "active" ? "bg-success/10 text-success" : "bg-muted text-muted-foreground")}>{att.status}</span>
@@ -190,6 +203,16 @@ export default function AttendantsPage() {
           );
         })()}
       </div>
+
+      <AttendantTransactionsDialog
+        open={!!viewAttendant}
+        onClose={() => setViewAttendant(null)}
+        attendantId={viewAttendant?.id ?? null}
+        attendantName={viewAttendant?.name}
+        from={periodRange.from}
+        to={periodRange.to}
+        periodLabel={periodRange.label}
+      />
     </div>
   );
 }

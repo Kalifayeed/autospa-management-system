@@ -10,6 +10,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TableSkeleton } from "@/components/skeletons";
+import AttendantTransactionsDialog from "@/components/AttendantTransactionsDialog";
 
 type SelectionMode = "single" | "range";
 
@@ -21,6 +22,7 @@ export default function PayrollPage() {
     from: new Date(),
     to: new Date(),
   });
+  const [viewAttendant, setViewAttendant] = useState<{ id: string; name: string } | null>(null);
 
   if (loading) return <TableSkeleton rows={5} />;
 
@@ -176,7 +178,11 @@ export default function PayrollPage() {
             <tbody>
               {rangeStats.attendantStats.map((att) => (
                 <tr key={att.id} className="border-b border-border/50">
-                  <td className="py-2.5 px-4 sm:px-0 font-medium text-card-foreground">{att.name}</td>
+                  <td className="py-2.5 px-4 sm:px-0 font-medium text-card-foreground">
+                    <button onClick={() => setViewAttendant({ id: att.id, name: att.name })} className="text-left hover:text-primary transition-colors">
+                      {att.name}
+                    </button>
+                  </td>
                   <td className="py-2.5 px-2 sm:px-0 text-right text-muted-foreground">{att.vehiclesHandled}</td>
                   <td className="py-2.5 px-2 sm:px-0 text-right text-muted-foreground">KES {att.totalSales.toLocaleString()}</td>
                   <td className="py-2.5 px-4 sm:px-0 text-right font-bold text-success">KES {Math.round(att.commission).toLocaleString()}</td>
@@ -194,6 +200,15 @@ export default function PayrollPage() {
           </table>
         </div>
       </div>
+
+      <AttendantTransactionsDialog
+        open={!!viewAttendant}
+        onClose={() => setViewAttendant(null)}
+        attendantId={viewAttendant?.id ?? null}
+        attendantName={viewAttendant?.name}
+        from={effectiveFrom ?? new Date()}
+        to={effectiveTo ?? effectiveFrom ?? new Date()}
+      />
     </div>
   );
 }
