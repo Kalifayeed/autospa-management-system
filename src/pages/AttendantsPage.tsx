@@ -203,6 +203,16 @@ export default function AttendantsPage() {
           );
         })()}
       </div>
+
+      <AttendantTransactionsDialog
+        open={!!viewAttendant}
+        onClose={() => setViewAttendant(null)}
+        attendantId={viewAttendant?.id ?? null}
+        attendantName={viewAttendant?.name}
+        from={periodRange.from}
+        to={periodRange.to}
+        periodLabel={periodRange.label}
+      />
     </div>
   );
 }
