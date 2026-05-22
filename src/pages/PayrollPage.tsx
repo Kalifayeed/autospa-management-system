@@ -200,6 +200,15 @@ export default function PayrollPage() {
           </table>
         </div>
       </div>
+
+      <AttendantTransactionsDialog
+        open={!!viewAttendant}
+        onClose={() => setViewAttendant(null)}
+        attendantId={viewAttendant?.id ?? null}
+        attendantName={viewAttendant?.name}
+        from={effectiveFrom ?? new Date()}
+        to={effectiveTo ?? effectiveFrom ?? new Date()}
+      />
     </div>
   );
 }
