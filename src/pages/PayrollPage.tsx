@@ -22,6 +22,7 @@ export default function PayrollPage() {
     from: new Date(),
     to: new Date(),
   });
+  const [viewAttendant, setViewAttendant] = useState<{ id: string; name: string } | null>(null);
 
   if (loading) return <TableSkeleton rows={5} />;
 
