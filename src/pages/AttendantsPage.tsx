@@ -24,6 +24,18 @@ export default function AttendantsPage() {
   const [formPhone, setFormPhone] = useState("");
   const [formShift, setFormShift] = useState<Attendant["shift"]>("morning");
   const [period, setPeriod] = useState<"today" | "week" | "month">("today");
+  const [viewAttendant, setViewAttendant] = useState<{ id: string; name: string } | null>(null);
+
+  const periodRange = useMemo(() => {
+    const now = new Date();
+    if (period === "today") return { from: now, to: now, label: "Today" };
+    if (period === "week") {
+      const from = new Date(now); from.setDate(from.getDate() - 7);
+      return { from, to: now, label: "This Week" };
+    }
+    const from = new Date(now.getFullYear(), now.getMonth(), 1);
+    return { from, to: now, label: "This Month" };
+  }, [period]);
 
   const periodStats = useMemo(() => {
     const now = new Date();
