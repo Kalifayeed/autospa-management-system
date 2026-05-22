@@ -155,7 +155,7 @@ export default function AttendantsPage() {
                       >
                         <div className="absolute -top-3 -left-2 text-3xl drop-shadow-md">{medals[i]}</div>
                         <div className="flex items-center justify-between mb-2 pl-7">
-                          <p className="font-display font-semibold text-card-foreground truncate">{att.name}</p>
+                          <button onClick={() => setViewAttendant({ id: att.id, name: att.name })} className="font-display font-semibold text-card-foreground truncate text-left hover:text-primary transition-colors">{att.name}</button>
                           <button onClick={() => openEdit(att)} className="h-7 w-7 rounded-md bg-background/40 flex items-center justify-center hover:bg-background/70">
                             <Pencil className="h-3 w-3 text-muted-foreground" />
                           </button>
