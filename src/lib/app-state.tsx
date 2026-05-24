@@ -126,7 +126,7 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
         const [txRes, expRes, attRes, custRes, svcRes, aoRes] = await Promise.all([
           supabase.from("transactions").select("*").order("created_at", { ascending: false }),
           supabase.from("expenses").select("*").order("date", { ascending: false }),
-          supabase.from("attendants").select("*").order("name"),
+          supabase.rpc("list_attendants"),
           supabase.from("customers").select("*").order("created_at", { ascending: false }),
           supabase.from("services").select("*").order("category, name"),
           supabase.from("add_ons").select("*").order("name"),
@@ -134,7 +134,7 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
         if (!isMounted) return;
         if (txRes.data) setTransactions(txRes.data.map(mapDbTransaction));
         if (expRes.data) setExpenses(expRes.data.map(mapDbExpense));
-        if (attRes.data) setAttendants(attRes.data.map(mapDbAttendant));
+        if (attRes.data) setAttendants((attRes.data as any[]).map(mapDbAttendant));
         if (custRes.data) setCustomers(custRes.data.map(mapDbCustomer));
         if (svcRes.data) setServices(svcRes.data.map(mapDbService));
         if (aoRes.data) setAddOns(aoRes.data.map(mapDbAddOn));
@@ -171,29 +171,20 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
     if (error) { console.error("Insert transaction error:", error); return; }
     if (data) setTransactions((prev) => [mapDbTransaction(data), ...prev]);
 
-    // Upsert customer if plate number exists
+    // Upsert customer if plate number exists (uses SECURITY DEFINER RPC so attendants can record visits without direct access to customer records)
     const cleanPlate = tx.plateNumber.replace(/\s/g, "").toUpperCase();
     if (cleanPlate && cleanPlate !== "CARPET") {
-      const { data: existing } = await supabase.from("customers").select("*").eq("plate_number", cleanPlate).maybeSingle();
-      if (existing) {
-        await supabase.from("customers").update({
-          visits: existing.visits + 1,
-          loyalty_points: existing.visits + 1,
-          last_visit: new Date().toISOString().split("T")[0],
-        }).eq("id", existing.id);
-        setCustomers((prev) => prev.map((c) => c.id === existing.id
-          ? { ...c, visits: existing.visits + 1, loyaltyPoints: existing.visits + 1, lastVisit: new Date().toISOString().split("T")[0] }
-          : c));
-      } else {
-        const { data: newCust } = await supabase.from("customers").insert({
-          plate_number: cleanPlate,
-          name: "",
-          phone: "",
-          visits: 1,
-          loyalty_points: 1,
-          last_visit: new Date().toISOString().split("T")[0],
-        }).select().single();
-        if (newCust) setCustomers((prev) => [mapDbCustomer(newCust), ...prev]);
+      const { error: rpcErr } = await supabase.rpc("record_customer_visit", { _plate: cleanPlate });
+      if (rpcErr) console.error("record_customer_visit error:", rpcErr);
+      // Refresh local customer cache only when caller has access (admins)
+      const { data: refreshed } = await supabase.from("customers").select("*").eq("plate_number", cleanPlate).maybeSingle();
+      if (refreshed) {
+        setCustomers((prev) => {
+          const exists = prev.some((c) => c.id === refreshed.id);
+          return exists
+            ? prev.map((c) => (c.id === refreshed.id ? mapDbCustomer(refreshed) : c))
+            : [mapDbCustomer(refreshed), ...prev];
+        });
       }
     }
   }, []);

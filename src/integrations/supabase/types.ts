@@ -305,6 +305,18 @@ export type Database = {
         }
         Returns: boolean
       }
+      list_attendants: {
+        Args: never
+        Returns: {
+          created_at: string
+          id: string
+          name: string
+          phone: string
+          shift: string
+          status: string
+        }[]
+      }
+      record_customer_visit: { Args: { _plate: string }; Returns: undefined }
     }
     Enums: {
       app_role: "admin" | "attendant"
