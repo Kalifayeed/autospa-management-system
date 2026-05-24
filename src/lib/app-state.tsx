@@ -126,7 +126,7 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
         const [txRes, expRes, attRes, custRes, svcRes, aoRes] = await Promise.all([
           supabase.from("transactions").select("*").order("created_at", { ascending: false }),
           supabase.from("expenses").select("*").order("date", { ascending: false }),
-          supabase.from("attendants").select("*").order("name"),
+          supabase.rpc("list_attendants"),
           supabase.from("customers").select("*").order("created_at", { ascending: false }),
           supabase.from("services").select("*").order("category, name"),
           supabase.from("add_ons").select("*").order("name"),
@@ -134,7 +134,7 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
         if (!isMounted) return;
         if (txRes.data) setTransactions(txRes.data.map(mapDbTransaction));
         if (expRes.data) setExpenses(expRes.data.map(mapDbExpense));
-        if (attRes.data) setAttendants(attRes.data.map(mapDbAttendant));
+        if (attRes.data) setAttendants((attRes.data as any[]).map(mapDbAttendant));
         if (custRes.data) setCustomers(custRes.data.map(mapDbCustomer));
         if (svcRes.data) setServices(svcRes.data.map(mapDbService));
         if (aoRes.data) setAddOns(aoRes.data.map(mapDbAddOn));
