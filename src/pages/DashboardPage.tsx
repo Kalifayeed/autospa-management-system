@@ -110,6 +110,8 @@ export default function DashboardPage() {
   const dayLabel = isTodaySelected ? "Today" : format(selectedDay, "MMM d, yyyy");
   const monthLabel = isThisMonthSelected ? "This Month" : format(selectedMonth, "MMMM yyyy");
 
+  if (loading) return <DashboardSkeleton />;
+
   return (
     <div className="space-y-6">
       <div className="flex items-start justify-between flex-wrap gap-3">
