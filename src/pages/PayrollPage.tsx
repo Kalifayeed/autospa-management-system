@@ -24,7 +24,7 @@ export default function PayrollPage() {
   });
   const [viewAttendant, setViewAttendant] = useState<{ id: string; name: string } | null>(null);
 
-  if (loading) return <TableSkeleton rows={5} />;
+  
 
   const effectiveFrom = mode === "single" ? singleDate : dateRange.from;
   const effectiveTo = mode === "single" ? singleDate : dateRange.to;
