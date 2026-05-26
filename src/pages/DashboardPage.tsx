@@ -33,8 +33,6 @@ export default function DashboardPage() {
   const [selectedDay, setSelectedDay] = useState<Date>(new Date());
   const [selectedMonth, setSelectedMonth] = useState<Date>(new Date());
 
-  if (loading) return <DashboardSkeleton />;
-
   const isTodaySelected = isSameDay(selectedDay, new Date());
   const isThisMonthSelected = isSameMonth(selectedMonth, new Date());
 
