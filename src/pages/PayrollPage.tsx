@@ -24,7 +24,7 @@ export default function PayrollPage() {
   });
   const [viewAttendant, setViewAttendant] = useState<{ id: string; name: string } | null>(null);
 
-  if (loading) return <TableSkeleton rows={5} />;
+  
 
   const effectiveFrom = mode === "single" ? singleDate : dateRange.from;
   const effectiveTo = mode === "single" ? singleDate : dateRange.to;
@@ -82,6 +82,8 @@ export default function PayrollPage() {
     }
     return `${format(effectiveFrom, "MMM d")} – ${format(effectiveTo ?? effectiveFrom, "MMM d, yyyy")}`;
   }, [effectiveFrom, effectiveTo, isToday, isSingleDay]);
+
+  if (loading) return <TableSkeleton rows={5} />;
 
   const resetToToday = () => {
     setSingleDate(new Date());
