@@ -83,6 +83,8 @@ export default function PayrollPage() {
     return `${format(effectiveFrom, "MMM d")} – ${format(effectiveTo ?? effectiveFrom, "MMM d, yyyy")}`;
   }, [effectiveFrom, effectiveTo, isToday, isSingleDay]);
 
+  if (loading) return <TableSkeleton rows={5} />;
+
   const resetToToday = () => {
     setSingleDate(new Date());
     setDateRange({ from: new Date(), to: new Date() });
