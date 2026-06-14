@@ -79,7 +79,7 @@ export default function NewTransactionPage() {
     const addOnNames = includesCarWash ? addOns.filter((a) => selectedAddOns.includes(a.id)).map((a) => a.name) : [];
 
     setSubmitting(true);
-    await addTransaction({
+    const result = await addTransaction({
       plateNumber: includesCarWash ? plateNumber.toUpperCase() : (carpetOwner || "CARPET"),
       vehicleType: includesCarWash ? vehicleType : "Carpet Wash",
       services: includesCarpet && !includesCarWash ? ["Carpet Wash"] : serviceNames,
@@ -96,6 +96,11 @@ export default function NewTransactionPage() {
         : undefined,
     });
     setSubmitting(false);
+
+    if (result?.error) {
+      toast.error(result.error);
+      return;
+    }
 
     toast.success("Transaction completed successfully!");
     navigate("/transactions");

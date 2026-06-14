@@ -1,0 +1,16 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\src",
+    "\\src\\components",
+    "\\src\\hooks",
+    "\\src\\integrations",
+    "\\src\\integrations\\supabase",
+    "\\src\\lib",
+    "\\supabase",
+    "\\supabase\\functions",
+    "\\supabase\\functions\\admin-manage-users"
+  ],
+  "SelectedNode": "\\supabase\\functions\\admin-manage-users",
+  "PreviewInSolutionExplorer": false
+}

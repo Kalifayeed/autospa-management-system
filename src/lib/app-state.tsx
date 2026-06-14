@@ -11,7 +11,7 @@ interface AppState {
   services: Service[];
   addOns: ServiceAddOn[];
   loading: boolean;
-  addTransaction: (tx: Omit<Transaction, "id">) => Promise<void>;
+  addTransaction: (tx: Omit<Transaction, "id">) => Promise<{ error?: string }>;
   addExpense: (exp: Omit<Expense, "id">) => Promise<void>;
   addAttendant: (att: Omit<Attendant, "id">) => Promise<void>;
   updateAttendant: (id: string, data: Partial<Attendant>) => Promise<void>;
@@ -148,7 +148,24 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
     return () => { isMounted = false; };
   }, []);
 
-  const addTransaction = useCallback(async (tx: Omit<Transaction, "id">) => {
+  const addTransaction = useCallback(async (tx: Omit<Transaction, "id">): Promise<{ error?: string }> => {
+    // Duplicate prevention: block same plate number within 12 hours for car wash transactions
+    const cleanPlate = tx.plateNumber.replace(/\s/g, "").toUpperCase();
+    const isCarWash = tx.services.length > 0 && tx.vehicleType !== "Carpet Wash";
+    if (isCarWash && cleanPlate && cleanPlate !== "CARPET") {
+      const twelveHoursAgo = new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString();
+      const { data: recentTx } = await supabase
+        .from("transactions")
+        .select("id, created_at, services")
+        .eq("plate_number", cleanPlate)
+        .gte("created_at", twelveHoursAgo)
+        .order("created_at", { ascending: false })
+        .limit(1);
+      if (recentTx && recentTx.length > 0) {
+        return { error: `Plate number "${cleanPlate}" was already served within the last 12 hours. Duplicate entry blocked.` };
+      }
+    }
+
     const { data, error } = await supabase.from("transactions").insert({
       plate_number: tx.plateNumber,
       vehicle_type: tx.vehicleType,
@@ -168,11 +185,10 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
       carpet_attendant: tx.carpetWash?.attendantId || null,
     }).select().single();
 
-    if (error) { console.error("Insert transaction error:", error); return; }
+    if (error) { console.error("Insert transaction error:", error); return { error: error.message }; }
     if (data) setTransactions((prev) => [mapDbTransaction(data), ...prev]);
 
     // Upsert customer if plate number exists (uses SECURITY DEFINER RPC so attendants can record visits without direct access to customer records)
-    const cleanPlate = tx.plateNumber.replace(/\s/g, "").toUpperCase();
     if (cleanPlate && cleanPlate !== "CARPET") {
       const { error: rpcErr } = await supabase.rpc("record_customer_visit", { _plate: cleanPlate });
       if (rpcErr) console.error("record_customer_visit error:", rpcErr);
